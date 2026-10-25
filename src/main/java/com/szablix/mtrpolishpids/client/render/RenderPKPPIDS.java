@@ -46,7 +46,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final Identifier TEXTURE_WHITE = new Identifier("mtr", "textures/block/white.png");
 	private static final Identifier TEXTURE_CLOCK_FACE = new Identifier(MTRPolishPIDS.MOD_ID, "textures/block/pkp_clock_face.png");
-	private static final Identifier FONT_MTR = new Identifier("mtr", "mtr");
+	private static final Identifier FONT_PKP = new Identifier(MTRPolishPIDS.MOD_ID, "pkp");
 
 	private static final float SCROLL_SPEED = 2.2f;
 
@@ -305,54 +305,14 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	}
 
 	private static MutableText getStyledText(String text, boolean italic) {
-		Style style = Style.getEmptyMapped().withFont(FONT_MTR);
+		Style style = Style.getEmptyMapped().withFont(FONT_PKP);
 		if (italic) {
 			style = style.withItalic(Boolean.TRUE);
 		}
 		return TextHelper.setStyle(TextHelper.literal(text), style);
 	}
 
-	private static float getSpacedTextWidth(String text, float size, boolean italic, float extraTracking) {
-		if (text == null || text.isEmpty()) {
-			return 0f;
-		}
-		final float scale = size / 8f;
-		float totalWidth = 0f;
-		final int len = text.length();
-		for (int i = 0; i < len; i++) {
-			final String ch = text.substring(i, i + 1);
-			final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic)) * scale;
-			totalWidth += w;
-			if (i < len - 1 && !ch.equals(" ")) {
-				totalWidth += extraTracking * scale;
-			}
-		}
-		return totalWidth;
-	}
-
-	private static void drawSpacedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float extraTracking) {
-		if (text == null || text.isEmpty()) {
-			return;
-		}
-		final float scale = size / 8f;
-		float currentX = x;
-		final int len = text.length();
-		for (int i = 0; i < len; i++) {
-			final String ch = text.substring(i, i + 1);
-			final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic)) * scale;
-			graphicsHolder.push();
-			graphicsHolder.translate(currentX, y, 0);
-			graphicsHolder.scale(scale, scale, 1);
-			graphicsHolder.drawText(getStyledText(ch, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
-			graphicsHolder.pop();
-			currentX += w;
-			if (!ch.equals(" ")) {
-				currentX += extraTracking * scale;
-			}
-		}
-	}
-
-	private static void drawClippedSpacedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float extraTracking, float minX, float maxX) {
+	private static void drawClippedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float minX, float maxX) {
 		if (text == null || text.isEmpty() || FIELD_MATRIX_STACK == null) {
 			return;
 		}
@@ -375,33 +335,18 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			matrixStack.translate(x, y, -LAYER_OFFSET * 5.0f);
 			matrixStack.scale(scale, scale, 1.0f);
 
-			float currentX = 0f;
-			final int len = text.length();
-			for (int i = 0; i < len; i++) {
-				final String ch = text.substring(i, i + 1);
-				final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic));
-
-				// Process glyph if it could intersect clip interval
-				if (currentX + w + 4f > clipMin && currentX - 4f < clipMax) {
-					textRenderer.draw(
-							(net.minecraft.text.Text) getStyledText(ch, italic).data,
-							currentX,
-							0f,
-							color | ARGB_BLACK,
-							false,
-							matrixStack.peek().getPositionMatrix(),
-							clippingProvider,
-							TextRenderer.TextLayerType.NORMAL,
-							0,
-							GraphicsHolder.getDefaultLight()
-					);
-				}
-
-				currentX += w;
-				if (!ch.equals(" ")) {
-					currentX += extraTracking;
-				}
-			}
+			textRenderer.draw(
+					(net.minecraft.text.Text) getStyledText(text, italic).data,
+					0f,
+					0f,
+					color | ARGB_BLACK,
+					false,
+					matrixStack.peek().getPositionMatrix(),
+					clippingProvider,
+					TextRenderer.TextLayerType.NORMAL,
+					0,
+					GraphicsHolder.getDefaultLight()
+			);
 
 			immediate.draw();
 			matrixStack.pop();
@@ -415,9 +360,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		final float extraTracking = 0.6f;
 		final float scale = size / 8f;
-		final float textWidth = getSpacedTextWidth(text, size, italic, extraTracking);
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, italic)) * scale;
 
 		// If it fits within the display width, render statically with normal size (no squashing)
 		if (textWidth <= availableWidth) {
@@ -425,9 +369,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		// Text exceeds available width: continuous marquee ticker with ~1 to 1.5 characters gap
-		final float charSpaceWidth = (GraphicsHolder.getTextWidth(getStyledText(" ", italic)) + extraTracking) * scale;
-		final float gapWidth = charSpaceWidth * 2.5f; // ~1.3 to 1.5 characters gap
+		// Text exceeds available width: continuous marquee ticker with ~1.5 to 2 spaces gap
+		final float spaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", italic)) * scale;
+		final float gapWidth = spaceWidth * 2.5f;
 		final float cycleWidth = textWidth + gapWidth;
 
 		final double timeSec = System.currentTimeMillis() / 1000.0;
@@ -436,30 +380,32 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		float copyStartX = -scrollOffset;
 		while (copyStartX < availableWidth) {
 			if (copyStartX + textWidth > 0) {
-				drawClippedSpacedText(graphicsHolder, text, x + copyStartX, y, size, color, italic, extraTracking, -copyStartX, availableWidth - copyStartX);
+				drawClippedText(graphicsHolder, text, x + copyStartX, y, size, color, italic, -copyStartX, availableWidth - copyStartX);
 			}
 			copyStartX += cycleWidth;
 		}
 	}
 
 	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, boolean italic) {
-		final float extraTracking = 0.6f;
 		final float scale = size / 8f;
-		final float textWidth = getSpacedTextWidth(text, size, italic, extraTracking);
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, italic)) * scale;
 		float drawX = x;
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 5.0f);
 		if (availableWidth < textWidth) {
 			graphicsHolder.translate(drawX, y, 0);
 			graphicsHolder.scale(textWidth == 0 ? 1 : availableWidth / textWidth, 1, 1);
-			drawSpacedText(graphicsHolder, text, 0, 0, size, color, italic, extraTracking);
+			graphicsHolder.scale(scale, scale, 1);
+			graphicsHolder.drawText(getStyledText(text, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
 		} else {
 			if (align == HorizontalAlignment.CENTER) {
 				drawX += (availableWidth - textWidth) / 2;
 			} else if (align == HorizontalAlignment.RIGHT) {
 				drawX += (availableWidth - textWidth);
 			}
-			drawSpacedText(graphicsHolder, text, drawX, y, size, color, italic, extraTracking);
+			graphicsHolder.translate(drawX, y, 0);
+			graphicsHolder.scale(scale, scale, 1);
+			graphicsHolder.drawText(getStyledText(text, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
 		}
 		graphicsHolder.pop();
 	}
