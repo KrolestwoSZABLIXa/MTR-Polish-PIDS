@@ -7,40 +7,74 @@
 	},
 	"elements": [
 		{
-			"__comment": "Top Frame Bezel (Thick Navy Housing)",
-			"from": [ 5.75, 10.25, 0 ],
-			"to": [ 10.25, 11.75, 16.0 ],
+			"__comment": "Top Frame Bezel (Outer Protruding Housing)",
+			"from": [ 5.65, 10.75, 0 ],
+			"to": [ 10.35, 11.75, 16.0 ],
 			"faces": {
 				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
 				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 1.5 ], "texture": "#case", "cullface": "south" },
-				"north": { "uv": [ 0, 0, 4, 1.5 ], "texture": "#case", "cullface": "north" },
-				"east": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" }
+				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "south" },
+				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
+				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Bottom Frame Bezel (Thick Navy Housing)",
-			"from": [ 5.75, 1.125, 0 ],
-			"to": [ 10.25, 2.625, 16.0 ],
+			"__comment": "Top Frame Step (Wcięcie w krawędzi górnej)",
+			"from": [ 5.85, 10.25, 0 ],
+			"to": [ 10.15, 10.75, 16.0 ],
+			"faces": {
+				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"south": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Bottom Frame Bezel (Outer Protruding Housing)",
+			"from": [ 5.65, 1.125, 0 ],
+			"to": [ 10.35, 2.125, 16.0 ],
 			"faces": {
 				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
 				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 1.5 ], "texture": "#case", "cullface": "south" },
-				"north": { "uv": [ 0, 0, 4, 1.5 ], "texture": "#case", "cullface": "north" },
-				"east": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" }
+				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "south" },
+				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
+				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Outer End Frame Bezel",
-			"from": [ 5.75, 2.625, 14.75 ],
-			"to": [ 10.25, 10.25, 16.0 ],
+			"__comment": "Bottom Frame Step (Wcięcie w krawędzi dolnej)",
+			"from": [ 5.85, 2.125, 0 ],
+			"to": [ 10.15, 2.625, 16.0 ],
+			"faces": {
+				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"south": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Outer End Frame Bezel (Outer Protruding Side)",
+			"from": [ 5.65, 2.125, 15.25 ],
+			"to": [ 10.35, 10.75, 16.0 ],
 			"faces": {
 				"south": { "uv": [ 0, 0, 4, 8 ], "texture": "#case", "cullface": "south" },
 				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#case" },
-				"east": { "uv": [ 0, 0, 1.25, 8 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 1.25, 8 ], "texture": "#case" }
+				"east": { "uv": [ 0, 0, 0.75, 8 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 0.75, 8 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Outer End Frame Step (Wcięcie w krawędzi bocznej)",
+			"from": [ 5.85, 2.625, 14.75 ],
+			"to": [ 10.15, 10.25, 15.25 ],
+			"faces": {
+				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 0.5, 8 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 0.5, 8 ], "texture": "#case" }
 			}
 		},
 		{
@@ -54,9 +88,9 @@
 			}
 		},
 		{
-			"__comment": "Ceiling Mounting Pole",
+			"__comment": "Ceiling Mounting Pole (Galvanized Steel)",
 			"from": [ 7.25, 11.75, 11.75 ],
-			"to": [ 8.75, 16, 13.25 ],
+			"to": [ 8.75, 16.0, 13.25 ],
 			"faces": {
 				"up": { "uv": [ 0, 0, 2, 2 ], "texture": "#mount", "cullface": "up" },
 				"north": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
@@ -66,7 +100,7 @@
 			}
 		},
 		{
-			"__comment": "Mount Bracket Flange",
+			"__comment": "Mount Bracket Flange (Galvanized Steel)",
 			"from": [ 6.75, 11.75, 11.25 ],
 			"to": [ 9.25, 12.35, 13.75 ],
 			"faces": {

@@ -113,10 +113,12 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
-		final float displayX = isClockOnRight ? 1.375f : 6.25f;
-		final float clockCenterX = isClockOnRight ? 28.75f : 3.25f;
+		// 3. Balanced coordinates leaving a subtle black glass margin from the casing edges
+		final float boxWidth = 23.5f;
+		final float displayX = isClockOnRight ? 2.0f : 6.50f;
+		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
 		final float clockCenterY = 4.5f;
-		final float clockRadius = 1.95f;
+		final float clockRadius = 1.85f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -131,17 +133,17 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 1: Blue arrival badge: w = 24.5, h = 4.875
+		// Layer 1: Blue arrival badge: w = 23.5, h = 4.875
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
-		IDrawing.drawTexture(graphicsHolder, displayX, 2.625f, 0, displayX + 24.5f, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 2.625f, 0, displayX + boxWidth, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 2: White box under time for line name & red accent line
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
 		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, displayX + 24.5f, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, displayX + boxWidth, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 4: Real-time clock hands
@@ -178,9 +180,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
-		final float clockCenterX = isClockOnRight ? 28.75f : 3.25f;
+		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
 		final float clockCenterY = 4.5f;
-		final float clockRadius = 1.95f;
+		final float clockRadius = 1.85f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -198,8 +200,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
-		final float displayX = isClockOnRight ? 1.375f : 6.25f;
-		final float textX = isClockOnRight ? 6.625f : 11.5f;
+		final float displayX = isClockOnRight ? 2.0f : 6.50f;
+		final float textX = isClockOnRight ? 7.25f : 11.75f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -219,7 +221,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				renderText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 19.25f, HorizontalAlignment.LEFT, false);
+				renderText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
 			}
 		} else {
 			// Departure Time formatted as HH:mm
@@ -237,9 +239,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, false);
 
-			// Destination at (textX, 2.625, w: 19.25, h: 2)
+			// Destination at (textX, 2.625, w: 18.25, h: 2)
 			final String destination = arrival.getDestination();
-			renderText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 19.25f, HorizontalAlignment.LEFT, false);
+			renderText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
 
 			// Intermediate stops (strictly excluding final destination station)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -272,7 +274,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 19.25f, HorizontalAlignment.LEFT, false);
+					renderText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
 				}
 			}
 		}
