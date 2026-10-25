@@ -27,10 +27,18 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 				if (player.isSneaking()) {
 					pkpEntity.toggleClockOrientation();
 					final boolean right = pkpEntity.isClockOnRight();
-					player.sendMessage(Text.cast(TextHelper.translatable(right ? "message.mtr_polish_pids.clock_right" : "message.mtr_polish_pids.clock_left")), true);
+					if (!world.isClient()) {
+						world.updateListeners(newBlockPos, world.getBlockState(newBlockPos), world.getBlockState(newBlockPos), 3);
+						if (!pos.equals(newBlockPos)) {
+							world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+						}
+						player.sendMessage(Text.cast(TextHelper.translatable(right ? "message.mtr_polish_pids.clock_right" : "message.mtr_polish_pids.clock_left")), true);
+					}
 				} else {
-					pkpEntity.markDirty2();
-					Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new PacketOpenPIDSConfigScreen(newBlockPos, pkpEntity.maxArrivals));
+					if (!world.isClient()) {
+						pkpEntity.markDirty2();
+						Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new PacketOpenPIDSConfigScreen(newBlockPos, pkpEntity.maxArrivals));
+					}
 				}
 			}
 		});
@@ -39,8 +47,8 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 	@Override
 	public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-		final VoxelShape casing = IBlock.getVoxelShapeByDirection(6, 2, 0, 10, 11, 16, facing);
-		final VoxelShape pole = IBlock.getVoxelShapeByDirection(7.25, 11, 11.5, 8.75, 16, 13.5, facing);
+		final VoxelShape casing = IBlock.getVoxelShapeByDirection(5.85, 1.75, 0, 10.15, 11.25, 16, facing);
+		final VoxelShape pole = IBlock.getVoxelShapeByDirection(7.25, 11.25, 11.75, 8.75, 16, 13.25, facing);
 		return VoxelShapes.union(casing, pole);
 	}
 
