@@ -83,7 +83,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer
+		// 1. Quads (Rectangles) on TEXTURE_WHITE in LIGHT layer
 		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -91,7 +91,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		});
 
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer
+		// 2. Mask Quads in EXTERIOR layer (writes depth to clip scrolling text pixel-by-pixel as a continuous stream)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+			renderSideMasks(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
+			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
+				renderSideMasks(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
+			}
+		});
+
+		// 3. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer (in front of mask)
 		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -99,7 +107,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		});
 
-		// 3. Text on QueuedRenderLayer.TEXT
+		// 4. Text on QueuedRenderLayer.TEXT
 		MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 			renderSideText(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -112,7 +120,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
-		// 3. Balanced coordinates leaving a subtle black glass margin from the casing edges
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
@@ -126,7 +133,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Layer 0: Screen background strictly matching JSON (0.2, 0.75, 31.6, 7.625)
+		// Layer 0: Screen background
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 0);
 		IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
@@ -138,14 +145,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, displayX, 2.625f, 0, displayX + boxWidth, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 2: White box under time for line name & red accent line
+		// Layer 1.5: Red accent line across display area
 		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1.5f);
 		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, displayX + boxWidth, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 4: Real-time clock hands
+		// Layer 4.5: Real-time clock hands (in front of clock face)
 		final LocalTime now = LocalTime.now();
 		final float hours = now.getHour() % 12f;
 		final float minutes = now.getMinute();
@@ -154,7 +160,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float minuteAngle = (minutes + seconds / 60f) * 6f;
 
 		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 4);
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 4.5f);
 
 		// Hour hand
 		graphicsHolder.push();
@@ -175,6 +181,43 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
+	private void renderSideMasks(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
+		final boolean clockConfigRight = entity.isClockOnRight();
+		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
+
+		final float displayX = isClockOnRight ? 2.0f : 6.50f;
+		final float textX = isClockOnRight ? 7.25f : 11.75f;
+		final float availableWidth = 18.25f;
+
+		graphicsHolder.push();
+		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
+		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
+		graphicsHolder.rotateZDegrees(180);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
+		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
+
+		// Depth Mask layer at -LAYER_OFFSET * 3.0f (between scrolling text at * 2 and foreground text at * 5)
+		graphicsHolder.push();
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 3.0f);
+
+		// Left mask: covers departure time area up to textX
+		IDrawing.drawTexture(graphicsHolder, displayX - 0.2f, 2.625f, 0, textX, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, textX, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+
+		// Right mask: covers from right margin of display text (textX + availableWidth) to the edge of casing
+		if (isClockOnRight) {
+			IDrawing.drawTexture(graphicsHolder, textX + availableWidth, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
+		} else {
+			IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, displayX, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, textX + availableWidth, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
+		}
+
+		graphicsHolder.pop();
+
+		graphicsHolder.pop();
+	}
+
 	private void renderSideClockFace(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
@@ -187,7 +230,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 4.0f);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
@@ -238,7 +281,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, false);
 
-			// Destination station with marquee scrolling when exceeding width
+			// Destination station with continuous marquee scrolling when exceeding width
 			final String destination = arrival.getDestination();
 			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, false);
 
@@ -287,14 +330,54 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		return TextHelper.setStyle(TextHelper.literal(text), style);
 	}
 
+	private static float getSpacedTextWidth(String text, float size, boolean italic, float extraTracking) {
+		if (text == null || text.isEmpty()) {
+			return 0f;
+		}
+		final float scale = size / 8f;
+		float totalWidth = 0f;
+		final int len = text.length();
+		for (int i = 0; i < len; i++) {
+			final String ch = text.substring(i, i + 1);
+			final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic)) * scale;
+			totalWidth += w;
+			if (i < len - 1 && !ch.equals(" ")) {
+				totalWidth += extraTracking * scale;
+			}
+		}
+		return totalWidth;
+	}
+
+	private static void drawSpacedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float extraTracking) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+		final float scale = size / 8f;
+		float currentX = x;
+		final int len = text.length();
+		for (int i = 0; i < len; i++) {
+			final String ch = text.substring(i, i + 1);
+			final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic)) * scale;
+			graphicsHolder.push();
+			graphicsHolder.translate(currentX, y, 0);
+			graphicsHolder.scale(scale, scale, 1);
+			graphicsHolder.drawText(getStyledText(ch, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.pop();
+			currentX += w;
+			if (!ch.equals(" ")) {
+				currentX += extraTracking * scale;
+			}
+		}
+	}
+
 	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, boolean italic) {
 		if (text == null || text.isEmpty()) {
 			return;
 		}
 
+		final float extraTracking = 0.6f;
 		final float scale = size / 8f;
-		final MutableText fullStyledText = getStyledText(text, italic);
-		final float textWidth = GraphicsHolder.getTextWidth(fullStyledText) * scale;
+		final float textWidth = getSpacedTextWidth(text, size, italic, extraTracking);
 
 		// If it fits within the display width, render statically with normal size (no squashing)
 		if (textWidth <= availableWidth) {
@@ -303,27 +386,21 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		}
 
 		// Text exceeds available width: continuous marquee ticker with ~1 to 1.5 characters gap
-		final float charSpaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", italic)) * scale;
+		final float charSpaceWidth = (GraphicsHolder.getTextWidth(getStyledText(" ", italic)) + extraTracking) * scale;
 		final float gapWidth = charSpaceWidth * 2.5f; // ~1.3 to 1.5 characters gap
 		final float cycleWidth = textWidth + gapWidth;
 
 		final double timeSec = System.currentTimeMillis() / 1000.0;
 		final float scrollOffset = (float) ((timeSec * SCROLL_SPEED) % cycleWidth);
 
-		final int len = text.length();
-		final float[] prefixWidths = new float[len + 1];
-		prefixWidths[0] = 0f;
-		for (int i = 1; i <= len; i++) {
-			prefixWidths[i] = GraphicsHolder.getTextWidth(getStyledText(text.substring(0, i), italic)) * scale;
-		}
-
+		// Rendered as continuous stream behind mask at -LAYER_OFFSET * 2.0f
 		graphicsHolder.push();
-		graphicsHolder.translate(x, y, -LAYER_OFFSET * 5);
+		graphicsHolder.translate(x, y, -LAYER_OFFSET * 2.0f);
 
 		float copyStartX = -scrollOffset;
 		while (copyStartX < availableWidth) {
-			if (copyStartX + textWidth > 0) {
-				renderVisibleSlice(graphicsHolder, text, prefixWidths, copyStartX, scale, color, availableWidth, italic);
+			if (copyStartX + textWidth > -availableWidth) {
+				drawSpacedText(graphicsHolder, text, copyStartX, 0, size, color, italic, extraTracking);
 			}
 			copyStartX += cycleWidth;
 		}
@@ -331,52 +408,25 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
-	private static void renderVisibleSlice(GraphicsHolder graphicsHolder, String text, float[] prefixWidths, float copyStartX, float scale, int color, float availableWidth, boolean italic) {
-		final int len = text.length();
-		int firstChar = -1;
-		int lastChar = -1;
-
-		for (int i = 0; i < len; i++) {
-			final float charLeft = copyStartX + prefixWidths[i];
-			final float charRight = copyStartX + prefixWidths[i + 1];
-
-			if (charRight > 0 && charLeft >= -0.5f && charLeft < availableWidth && charRight <= availableWidth + 0.4f) {
-				if (firstChar == -1) {
-					firstChar = i;
-				}
-				lastChar = i + 1;
-			}
-		}
-
-		if (firstChar != -1 && lastChar > firstChar) {
-			final String visibleText = text.substring(firstChar, lastChar);
-			final MutableText styledSlice = getStyledText(visibleText, italic);
-			final float drawX = copyStartX + prefixWidths[firstChar];
-
-			graphicsHolder.push();
-			graphicsHolder.translate(drawX, 0, 0);
-			graphicsHolder.scale(scale, scale, 1);
-			graphicsHolder.drawText(styledSlice, 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
-			graphicsHolder.pop();
-		}
-	}
-
 	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, boolean italic) {
-		graphicsHolder.push();
+		final float extraTracking = 0.6f;
 		final float scale = size / 8f;
-		graphicsHolder.translate(x, y, -LAYER_OFFSET * 5);
-		final MutableText mutableText = getStyledText(text, italic);
-		final float textWidth = GraphicsHolder.getTextWidth(mutableText) * scale;
+		final float textWidth = getSpacedTextWidth(text, size, italic, extraTracking);
+		float drawX = x;
+		graphicsHolder.push();
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 5.0f);
 		if (availableWidth < textWidth) {
+			graphicsHolder.translate(drawX, y, 0);
 			graphicsHolder.scale(textWidth == 0 ? 1 : availableWidth / textWidth, 1, 1);
+			drawSpacedText(graphicsHolder, text, 0, 0, size, color, italic, extraTracking);
+		} else {
+			if (align == HorizontalAlignment.CENTER) {
+				drawX += (availableWidth - textWidth) / 2;
+			} else if (align == HorizontalAlignment.RIGHT) {
+				drawX += (availableWidth - textWidth);
+			}
+			drawSpacedText(graphicsHolder, text, drawX, y, size, color, italic, extraTracking);
 		}
-		if (align == HorizontalAlignment.CENTER) {
-			graphicsHolder.translate(Math.max(0, availableWidth - textWidth) / 2, 0, 0);
-		} else if (align == HorizontalAlignment.RIGHT) {
-			graphicsHolder.translate(Math.max(0, availableWidth - textWidth), 0, 0);
-		}
-		graphicsHolder.scale(scale, scale, 1);
-		graphicsHolder.drawText(mutableText, 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 	}
 }
