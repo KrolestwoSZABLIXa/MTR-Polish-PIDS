@@ -7,79 +7,113 @@
 	},
 	"elements": [
 		{
-			"__comment": "Top Frame Bezel (Outer Protruding Housing)",
-			"from": [ 5.65, 10.75, 0 ],
+			"__comment": "Top Front Shell Rim",
+			"from": [ 5.65, 10.25, 0.0 ],
+			"to": [ 7.15, 11.75, 16.0 ],
+			"faces": {
+				"up": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"down": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 1.0 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case", "cullface": "north" },
+				"south": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Top Back Shell Rim",
+			"from": [ 8.85, 10.25, 0.0 ],
 			"to": [ 10.35, 11.75, 16.0 ],
 			"faces": {
-				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "south" },
-				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
-				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
+				"up": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"down": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1.0 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case", "cullface": "north" },
+				"south": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Top Frame Step (Wcięcie w krawędzi górnej)",
-			"from": [ 5.85, 10.25, 0 ],
-			"to": [ 10.15, 10.75, 16.0 ],
+			"__comment": "Top Recessed Center Groove Floor",
+			"from": [ 7.15, 10.25, 0.0 ],
+			"to": [ 8.85, 10.75, 15.0 ],
 			"faces": {
-				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
-				"north": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
-				"east": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" }
+				"up": { "uv": [ 0, 0, 1.7, 15 ], "texture": "#case" },
+				"down": { "uv": [ 0, 0, 1.7, 15 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.7, 0.5 ], "texture": "#case", "cullface": "north" }
 			}
 		},
 		{
-			"__comment": "Bottom Frame Bezel (Outer Protruding Housing)",
-			"from": [ 5.65, 1.125, 0 ],
-			"to": [ 10.35, 2.125, 16.0 ],
+			"__comment": "Bottom Front Shell Rim",
+			"from": [ 5.65, 1.125, 0.0 ],
+			"to": [ 7.15, 2.625, 16.0 ],
 			"faces": {
-				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "south" },
-				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
-				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
+				"down": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 1.0 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case", "cullface": "north" },
+				"south": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Bottom Frame Step (Wcięcie w krawędzi dolnej)",
-			"from": [ 5.85, 2.125, 0 ],
-			"to": [ 10.15, 2.625, 16.0 ],
+			"__comment": "Bottom Back Shell Rim",
+			"from": [ 8.85, 1.125, 0.0 ],
+			"to": [ 10.35, 2.625, 16.0 ],
 			"faces": {
-				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
-				"south": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
-				"north": { "uv": [ 0, 0, 4, 0.5 ], "texture": "#case" },
-				"east": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 16, 0.5 ], "texture": "#case" }
+				"down": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 1.5, 16 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 16, 1.5 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1.0 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case", "cullface": "north" },
+				"south": { "uv": [ 0, 0, 1.5, 1.5 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Outer End Frame Bezel (Outer Protruding Side)",
-			"from": [ 5.65, 2.125, 15.25 ],
-			"to": [ 10.35, 10.75, 16.0 ],
+			"__comment": "Bottom Recessed Center Groove Ceiling",
+			"from": [ 7.15, 2.125, 0.0 ],
+			"to": [ 8.85, 2.625, 15.0 ],
 			"faces": {
-				"south": { "uv": [ 0, 0, 4, 8 ], "texture": "#case", "cullface": "south" },
-				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#case" },
-				"east": { "uv": [ 0, 0, 0.75, 8 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 0.75, 8 ], "texture": "#case" }
+				"down": { "uv": [ 0, 0, 1.7, 15 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 1.7, 15 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.7, 0.5 ], "texture": "#case", "cullface": "north" }
 			}
 		},
 		{
-			"__comment": "Outer End Frame Step (Wcięcie w krawędzi bocznej)",
-			"from": [ 5.85, 2.625, 14.75 ],
-			"to": [ 10.15, 10.25, 15.25 ],
+			"__comment": "Outer End Front Shell Rim",
+			"from": [ 5.65, 2.625, 14.75 ],
+			"to": [ 7.15, 10.25, 16.0 ],
 			"faces": {
-				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#case" },
-				"east": { "uv": [ 0, 0, 0.5, 8 ], "texture": "#case" },
-				"west": { "uv": [ 0, 0, 0.5, 8 ], "texture": "#case" }
+				"south": { "uv": [ 0, 0, 1.5, 7.6 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 7.6 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 1.25, 7.6 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 1.0, 7.6 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Outer End Back Shell Rim",
+			"from": [ 8.85, 2.625, 14.75 ],
+			"to": [ 10.35, 10.25, 16.0 ],
+			"faces": {
+				"south": { "uv": [ 0, 0, 1.5, 7.6 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.5, 7.6 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 1.25, 7.6 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 1.0, 7.6 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Outer End Recessed Center Groove Wall",
+			"from": [ 7.15, 2.125, 14.75 ],
+			"to": [ 8.85, 10.75, 15.0 ],
+			"faces": {
+				"south": { "uv": [ 0, 0, 1.7, 8.6 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 1.7, 8.6 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 1.7, 0.25 ], "texture": "#case" },
+				"down": { "uv": [ 0, 0, 1.7, 0.25 ], "texture": "#case" }
 			}
 		},
 		{
 			"__comment": "Smooth Tinted Black Screen Plate",
-			"from": [ 6.15, 2.625, 0 ],
+			"from": [ 6.15, 2.625, 0.0 ],
 			"to": [ 9.85, 10.25, 14.75 ],
 			"faces": {
 				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#screen", "cullface": "north" },
@@ -88,27 +122,40 @@
 			}
 		},
 		{
-			"__comment": "Ceiling Mounting Pole (Galvanized Steel)",
-			"from": [ 7.25, 11.75, 11.75 ],
-			"to": [ 8.75, 16.0, 13.25 ],
+			"__comment": "Mount Bracket Clamp Base (Anchored into Center Groove)",
+			"from": [ 7.20, 10.75, 11.25 ],
+			"to": [ 8.80, 11.35, 13.75 ],
 			"faces": {
-				"up": { "uv": [ 0, 0, 2, 2 ], "texture": "#mount", "cullface": "up" },
-				"north": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
-				"south": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
-				"east": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
-				"west": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" }
+				"up": { "uv": [ 0, 0, 1.6, 2.5 ], "texture": "#mount" },
+				"north": { "uv": [ 0, 0, 1.6, 0.6 ], "texture": "#mount" },
+				"south": { "uv": [ 0, 0, 1.6, 0.6 ], "texture": "#mount" },
+				"east": { "uv": [ 0, 0, 2.5, 0.6 ], "texture": "#mount" },
+				"west": { "uv": [ 0, 0, 2.5, 0.6 ], "texture": "#mount" }
 			}
 		},
 		{
-			"__comment": "Mount Bracket Flange (Galvanized Steel)",
-			"from": [ 6.75, 11.75, 11.25 ],
-			"to": [ 9.25, 12.35, 13.75 ],
+			"__comment": "Mount Bracket Clamping Arms (Gripping Casing Groove)",
+			"from": [ 6.80, 11.35, 11.5 ],
+			"to": [ 9.20, 11.85, 13.5 ],
 			"faces": {
-				"up": { "uv": [ 0, 0, 3, 3 ], "texture": "#mount" },
-				"north": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
-				"south": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
-				"east": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
-				"west": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" }
+				"up": { "uv": [ 0, 0, 2.4, 2.0 ], "texture": "#mount" },
+				"down": { "uv": [ 0, 0, 2.4, 2.0 ], "texture": "#mount" },
+				"north": { "uv": [ 0, 0, 2.4, 0.5 ], "texture": "#mount" },
+				"south": { "uv": [ 0, 0, 2.4, 0.5 ], "texture": "#mount" },
+				"east": { "uv": [ 0, 0, 2.0, 0.5 ], "texture": "#mount" },
+				"west": { "uv": [ 0, 0, 2.0, 0.5 ], "texture": "#mount" }
+			}
+		},
+		{
+			"__comment": "Ceiling Mounting Pole (Galvanized Steel)",
+			"from": [ 7.40, 11.35, 12.0 ],
+			"to": [ 8.60, 16.0, 13.0 ],
+			"faces": {
+				"up": { "uv": [ 0, 0, 1.2, 1.0 ], "texture": "#mount", "cullface": "up" },
+				"north": { "uv": [ 0, 0, 1.2, 4.65 ], "texture": "#mount" },
+				"south": { "uv": [ 0, 0, 1.2, 4.65 ], "texture": "#mount" },
+				"east": { "uv": [ 0, 0, 1.0, 4.65 ], "texture": "#mount" },
+				"west": { "uv": [ 0, 0, 1.0, 4.65 ], "texture": "#mount" }
 			}
 		}
 	]
