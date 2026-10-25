@@ -101,8 +101,8 @@ public class PKPTextTextureManager {
 		final String line1 = "peron  " + cleanPlatform;
 		final String line2 = "platform";
 
-		final float size1 = 44f;
-		final float size2 = 24f;
+		final float size1 = 60f;
+		final float size2 = 30f;
 		final Font f1 = FONT_MYRIAD_REGULAR.deriveFont(Font.PLAIN, size1);
 		final Font f2 = FONT_MYRIAD_ITALIC.deriveFont(Font.PLAIN, size2);
 
@@ -117,23 +117,28 @@ public class PKPTextTextureManager {
 		final int w2 = fm2.stringWidth(line2);
 		gProbe.dispose();
 
-		final int textWidth = Math.max(w1, w2) + 20;
-		final int textHeight = 90;
+		final int padX = 6;
+		final int padY = 2;
+		final int base1 = padY + fm1.getAscent();
+		final int gap = 4;
+		final int base2 = base1 + fm1.getDescent() + gap + fm2.getAscent();
+		final int totalH = base2 + fm2.getDescent() + padY;
+		final int totalW = Math.max(w1, w2) + padX * 2;
 
-		final BufferedImage img = new BufferedImage(Math.max(16, textWidth), textHeight, BufferedImage.TYPE_INT_ARGB);
+		final BufferedImage img = new BufferedImage(Math.max(16, totalW), totalH, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g = img.createGraphics();
 		setupQualityHints(g);
 
 		g.setColor(Color.WHITE);
 		g.setFont(f1);
-		g.drawString(line1, 6, 42);
+		g.drawString(line1, padX, base1);
 
 		g.setFont(f2);
-		g.drawString(line2, 6, 78);
+		g.drawString(line2, padX, base2);
 
 		g.dispose();
 
-		return registerTexture(key, img, textWidth, textHeight);
+		return registerTexture(key, img, totalW, totalH);
 	}
 
 	/**
@@ -153,9 +158,11 @@ public class PKPTextTextureManager {
 		final Graphics2D gProbe = probe.createGraphics();
 		gProbe.setFont(derivedFont);
 		final FontMetrics fm = gProbe.getFontMetrics();
-		final int stringWidth = Math.max(4, fm.stringWidth(safeText) + 12);
-		final int stringHeight = Math.max(16, (int) (fontSize * 1.45f));
-		final int baseline = fm.getAscent() + (stringHeight - fm.getHeight()) / 2;
+		final int padX = 6;
+		final int stringWidth = Math.max(4, fm.stringWidth(safeText) + padX * 2);
+		final int padY = 2;
+		final int stringHeight = Math.max(16, fm.getAscent() + fm.getDescent() + padY * 2);
+		final int baseline = padY + fm.getAscent();
 		gProbe.dispose();
 
 		final BufferedImage img = new BufferedImage(stringWidth, stringHeight, BufferedImage.TYPE_INT_ARGB);
@@ -164,7 +171,7 @@ public class PKPTextTextureManager {
 
 		g.setColor(color);
 		g.setFont(derivedFont);
-		g.drawString(safeText, 4, baseline);
+		g.drawString(safeText, padX, baseline);
 		g.dispose();
 
 		return registerTexture(key, img, stringWidth, stringHeight);

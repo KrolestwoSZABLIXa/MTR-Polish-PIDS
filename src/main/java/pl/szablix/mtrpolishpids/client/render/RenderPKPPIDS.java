@@ -211,15 +211,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		// 1. Casing plate (Ipi-1): "peron X" and "platform" in Myriad Pro
 		final PKPTextTextureManager.DynamicTextTexture casingTex = PKPTextTextureManager.getCasingPlate(platformName);
-		renderStaticTexture(entity, blockPos, facing, isBackSide, casingTex, 13.125f, 0.95f, 1.65f, 8.0f, HorizontalAlignment.LEFT);
+		renderStaticTexture(entity, blockPos, facing, isBackSide, casingTex, 13.125f, 0.85f, 1.85f, 8.0f, HorizontalAlignment.LEFT);
 
 		final String customMessage = entity.getMessage(0);
 		final boolean hideArrival = entity.getHideArrival(0);
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 42f, Color.WHITE);
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.65f, 1.50f, 18.25f, HorizontalAlignment.LEFT);
+				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 50f, Color.WHITE);
+				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.60f, 1.75f, 18.25f, HorizontalAlignment.LEFT);
 			}
 		} else {
 			// Departure Time
@@ -230,20 +230,20 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					.toLocalTime();
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
-			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 52f, Color.WHITE);
-			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.95f, 2.0f, 5.125f, HorizontalAlignment.CENTER);
+			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 58f, Color.WHITE);
+			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.85f, 2.15f, 5.125f, HorizontalAlignment.CENTER);
 
 			// Train Line / Route Number on white badge (black text)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			if (!lineName.isEmpty()) {
-				final PKPTextTextureManager.DynamicTextTexture lineTex = PKPTextTextureManager.getText("badge", lineName, PKPTextTextureManager.getRobotoMedium(), 32f, Color.BLACK);
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, lineTex, displayX + 0.2f, 5.68f, 0.74f, 4.725f, HorizontalAlignment.CENTER);
+				final PKPTextTextureManager.DynamicTextTexture lineTex = PKPTextTextureManager.getText("badge", lineName, PKPTextTextureManager.getRobotoMedium(), 38f, Color.BLACK);
+				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, lineTex, displayX + 0.2f, 5.67f, 0.76f, 4.725f, HorizontalAlignment.CENTER);
 			}
 
 			// Destination Station
 			final String destination = arrival.getDestination();
-			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 52f, Color.WHITE);
-			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.95f, 2.0f, 18.25f, HorizontalAlignment.LEFT);
+			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 58f, Color.WHITE);
+			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.85f, 2.15f, 18.25f, HorizontalAlignment.LEFT);
 
 			// Intermediate stops (Przez / Via)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -264,8 +264,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 				if (!viaStationNames.isEmpty()) {
 					// "Przez / Via" label
-					final PKPTextTextureManager.DynamicTextTexture viaLblTex = PKPTextTextureManager.getText("via_lbl", "Przez / Via", PKPTextTextureManager.getRobotoItalic(), 24f, Color.WHITE);
-					renderStaticTexture(entity, blockPos, facing, isBackSide, viaLblTex, textX, 4.88f, 0.65f, 4.875f, HorizontalAlignment.LEFT);
+					final PKPTextTextureManager.DynamicTextTexture viaLblTex = PKPTextTextureManager.getText("via_lbl", "Przez / Via", PKPTextTextureManager.getRobotoItalic(), 28f, Color.WHITE);
+					renderStaticTexture(entity, blockPos, facing, isBackSide, viaLblTex, textX, 4.95f, 0.65f, 4.875f, HorizontalAlignment.LEFT);
 
 					// Intermediate stops list
 					final StringBuilder sb = new StringBuilder();
@@ -275,8 +275,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					final PKPTextTextureManager.DynamicTextTexture viaStopsTex = PKPTextTextureManager.getText("via_stops", sb.toString(), PKPTextTextureManager.getRobotoRegular(), 26f, Color.WHITE);
-					renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, viaStopsTex, textX, 5.75f, 0.75f, 18.25f, HorizontalAlignment.LEFT);
+					final PKPTextTextureManager.DynamicTextTexture viaStopsTex = PKPTextTextureManager.getText("via_stops", sb.toString(), PKPTextTextureManager.getRobotoRegular(), 34f, Color.WHITE);
+					renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, viaStopsTex, textX, 5.66f, 0.78f, 18.25f, HorizontalAlignment.LEFT);
 				}
 			}
 
@@ -288,8 +288,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				if (!customMessage.isEmpty()) {
 					redBarSb.append(" | ").append(customMessage);
 				}
-				final PKPTextTextureManager.DynamicTextTexture delayTex = PKPTextTextureManager.getText("delay", redBarSb.toString(), PKPTextTextureManager.getRobotoItalic(), 22f, Color.WHITE);
-				renderMarqueeTexture(entity, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.58f, 0.58f, boxWidth - 0.70f);
+				final PKPTextTextureManager.DynamicTextTexture delayTex = PKPTextTextureManager.getText("delay", redBarSb.toString(), PKPTextTextureManager.getRobotoItalic(), 28f, Color.WHITE);
+				renderMarqueeTexture(entity, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.57f, 0.60f, boxWidth - 0.70f);
 			}
 		}
 	}
