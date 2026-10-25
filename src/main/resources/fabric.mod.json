@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "mtr_polish_pids",
+  "version": "${version}",
+  "name": "MTR Polish PIDS",
+  "description": "Polskie tablice Systemu Dynamicznej Informacji Pasa\u017cerskiej (PIDS) dla Minecraft Transit Railway.",
+  "authors": [
+    "SZABLIX"
+  ],
+  "contact": {
+    "sources": "https://github.com/KrolestwoSZABLIXa/MTR-Polish-PIDS"
+  },
+  "license": "MIT",
+  "icon": "assets/mtr_polish_pids/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.szablix.mtrpolishpids.MTRPolishPIDS"
+    ],
+    "client": [
+      "com.szablix.mtrpolishpids.client.MTRPolishPIDSClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*",
+    "mtr": ">=4.0.0"
+  }
+}

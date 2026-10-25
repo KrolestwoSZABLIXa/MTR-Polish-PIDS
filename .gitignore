@@ -1,0 +1,27 @@
+# Build and cache directories
+.gradle/
+build/
+bin/
+out/
+
+# IDE directories
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# Minecraft run directory
+run/
+
+# JAR files (except gradle wrapper)
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs and OS files
+*.log
+Thumbs.db
+.DS_Store

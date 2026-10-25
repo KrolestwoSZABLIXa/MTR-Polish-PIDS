@@ -1,0 +1,17 @@
+package com.szablix.mtrpolishpids.client;
+
+import com.szablix.mtrpolishpids.MTRPolishPIDS;
+import com.szablix.mtrpolishpids.client.render.RenderPKPPIDS;
+import net.fabricmc.api.ClientModInitializer;
+import org.mtr.mapping.registry.RegistryClient;
+
+public class MTRPolishPIDSClient implements ClientModInitializer {
+
+	public static final RegistryClient REGISTRY_CLIENT = new RegistryClient(MTRPolishPIDS.REGISTRY);
+
+	@Override
+	public void onInitializeClient() {
+		REGISTRY_CLIENT.registerBlockEntityRenderer(MTRPolishPIDS.BLOCK_ENTITY_TYPE_PKP_PIDS, RenderPKPPIDS::new);
+		REGISTRY_CLIENT.init();
+	}
+}
