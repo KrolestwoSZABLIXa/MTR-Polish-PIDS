@@ -3,8 +3,6 @@ package pl.szablix.mtrpolishpids;
 import pl.szablix.mtrpolishpids.block.BlockPKPPIDS;
 import pl.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.ItemGroups;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.mtr.mapping.holder.Block;
@@ -33,8 +31,7 @@ public class MTRPolishPIDS implements ModInitializer {
 	public static final BlockRegistryObject BLOCK_PKP_PIDS = REGISTRY.registerBlockWithBlockItem(
 			new Identifier(MOD_ID, "pkp_pids_horizontal"),
 			() -> new Block(new BlockPKPPIDS()),
-			CREATIVE_TAB,
-			org.mtr.mod.CreativeModeTabs.STATION_BUILDING_BLOCKS
+			CREATIVE_TAB
 	);
 
 	public static final BlockEntityTypeRegistryObject<BlockEntityPKPPIDS> BLOCK_ENTITY_TYPE_PKP_PIDS = REGISTRY.registerBlockEntityType(
@@ -50,9 +47,5 @@ public class MTRPolishPIDS implements ModInitializer {
 		REGISTRY.registerPacket(pl.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen.class, pl.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen::new);
 		REGISTRY.registerPacket(pl.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock.class, pl.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock::new);
 		REGISTRY.init();
-
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(entries -> {
-			entries.add(BLOCK_PKP_PIDS.get().data);
-		});
 	}
 }

@@ -171,11 +171,19 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 2: White box under time for line name & red accent line
+		// Layer 2: White box under time for line name & red accent line (only rendered when delayed)
+		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
+		final boolean hideArrival = entity.getHideArrival(0);
+		final long delayMinutes = (arrival != null && !hideArrival && arrival.getDeviation() > 0)
+				? (arrival.getDeviation() + 30000) / 60000
+				: 0;
+
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
 		IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+		if (delayMinutes > 0) {
+			IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+		}
 		graphicsHolder.pop();
 
 		// Layer 4: Real-time clock hands
@@ -271,9 +279,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			// Departure time at (displayX, headerY, w: 5.125, h: 2, align: center)
 			renderText(graphicsHolder, departureTimeText, displayX, headerY, headerSize, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
-			// Line name at (displayX, 5.65, w: 5.125, h: 0.80, color: black)
+			// Line/train name on the white badge: marquee scroll if exceeds width, else center
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
-			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.70f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
+			renderScrollingOrCenteredText(graphicsHolder, lineName, displayX + 0.2f, 5.70f, 0.75f, COLOR_BLACK, 4.725f, FONT_ROBOTO_MEDIUM);
 
 			// Destination station aligned with departure time
 			final String destination = arrival.getDestination();
@@ -312,46 +320,24 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 			}
 
-			// Red accent bar: real-time delay ("Opóźniony Xmin/delayed Xmin") and announcement message
-			final StringBuilder redBarSb = new StringBuilder();
+			// Red accent bar: real-time delay ("Opóźniony Xmin/delayed Xmin") - only rendered when delayed, always marquee scrolling
 			final long delayMinutes = arrival.getDeviation() > 0 ? (arrival.getDeviation() + 30000) / 60000 : 0;
 			if (delayMinutes > 0) {
+				final StringBuilder redBarSb = new StringBuilder();
 				redBarSb.append("Op\u00f3\u017aniony ").append(delayMinutes).append("min/delayed ").append(delayMinutes).append("min");
-			}
-			if (!customMessage.isEmpty()) {
-				if (redBarSb.length() > 0) {
-					redBarSb.append(" | ");
+				if (!customMessage.isEmpty()) {
+					redBarSb.append(" | ").append(customMessage);
 				}
-				redBarSb.append(customMessage);
-			}
-
-			final String redBarText = redBarSb.toString();
-			if (!redBarText.isEmpty()) {
-				renderScrollingOrStaticText(graphicsHolder, redBarText, displayX + 0.35f, 6.58f, 0.50f, COLOR_WHITE, boxWidth - 0.70f, FONT_ROBOTO_ITALIC);
+				renderContinuousMarquee(graphicsHolder, redBarSb.toString(), displayX + 0.35f, 6.58f, 0.50f, COLOR_WHITE, boxWidth - 0.70f, FONT_ROBOTO_ITALIC);
 			}
 		}
 
 		graphicsHolder.pop();
 	}
 
-	private static String applyKerning(String text) {
-		if (text == null || text.isEmpty()) {
-			return text;
-		}
-		// Fix known sans-serif colliding pairs (such as 'uj' and 'Ry' in Polish station names) using dedicated hair-space provider
-		return text.replace("uj", "u\u200Aj")
-				   .replace("uJ", "u\u200AJ")
-				   .replace("Uj", "U\u200Aj")
-				   .replace("UJ", "U\u200AJ")
-				   .replace("Ry", "R\u200Ay")
-				   .replace("ry", "r\u200Ay")
-				   .replace("RY", "R\u200AY")
-				   .replace("rY", "r\u200AY");
-	}
-
 	private static MutableText getStyledText(String text, Identifier font) {
 		final Style style = Style.getEmptyMapped().withFont(font);
-		return TextHelper.setStyle(TextHelper.literal(applyKerning(text)), style);
+		return TextHelper.setStyle(TextHelper.literal(text), style);
 	}
 
 	private static void drawClippedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, Identifier font, float minX, float maxX) {
@@ -397,21 +383,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		}
 	}
 
-	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, Identifier font) {
+	private static void renderContinuousMarquee(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, Identifier font) {
 		if (text == null || text.isEmpty()) {
 			return;
 		}
 
 		final float scale = size / 8f;
 		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, font)) * scale;
-
-		// If it fits within the display width, render statically with normal size (no squashing)
-		if (textWidth <= availableWidth) {
-			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.LEFT, font);
-			return;
-		}
-
-		// Text exceeds available width: continuous marquee ticker with clear separation gap
 		final float spaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", font)) * scale;
 		final float gapWidth = spaceWidth * 6.0f;
 		final float cycleWidth = textWidth + gapWidth;
@@ -426,6 +404,38 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 			copyStartX += cycleWidth;
 		}
+	}
+
+	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, Identifier font) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+
+		final float scale = size / 8f;
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, font)) * scale;
+
+		if (textWidth <= availableWidth) {
+			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.LEFT, font);
+			return;
+		}
+
+		renderContinuousMarquee(graphicsHolder, text, x, y, size, color, availableWidth, font);
+	}
+
+	private static void renderScrollingOrCenteredText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, Identifier font) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+
+		final float scale = size / 8f;
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, font)) * scale;
+
+		if (textWidth <= availableWidth) {
+			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.CENTER, font);
+			return;
+		}
+
+		renderContinuousMarquee(graphicsHolder, text, x, y, size, color, availableWidth, font);
 	}
 
 	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, Identifier font) {
