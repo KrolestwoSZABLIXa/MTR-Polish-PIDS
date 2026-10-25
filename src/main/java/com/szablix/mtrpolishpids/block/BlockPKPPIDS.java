@@ -1,13 +1,14 @@
 package com.szablix.mtrpolishpids.block;
 
+import com.szablix.mtrpolishpids.MTRPolishPIDS;
 import com.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
+import com.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.BlockEntityExtension;
 import org.mtr.mapping.mapper.TextHelper;
 import org.mtr.mod.Init;
 import org.mtr.mod.block.BlockPIDSHorizontalBase;
 import org.mtr.mod.block.IBlock;
-import org.mtr.mod.packet.PacketOpenPIDSConfigScreen;
 
 public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 
@@ -37,7 +38,7 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 				} else {
 					if (!world.isClient()) {
 						pkpEntity.markDirty2();
-						Init.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new PacketOpenPIDSConfigScreen(newBlockPos, pkpEntity.maxArrivals));
+						MTRPolishPIDS.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new com.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen(newBlockPos, pkpEntity.maxArrivals, pkpEntity.isClockOnRight()));
 					}
 				}
 			}

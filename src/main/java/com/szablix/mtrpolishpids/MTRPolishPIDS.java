@@ -38,6 +38,9 @@ public class MTRPolishPIDS implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Initializing MTR Polish PIDS mod...");
+		REGISTRY.setupPackets(new Identifier(MOD_ID, "packet"));
+		REGISTRY.registerPacket(com.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen.class, com.szablix.mtrpolishpids.packet.PacketOpenPKPPIDSConfigScreen::new);
+		REGISTRY.registerPacket(com.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock.class, com.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock::new);
 		REGISTRY.init();
 	}
 }

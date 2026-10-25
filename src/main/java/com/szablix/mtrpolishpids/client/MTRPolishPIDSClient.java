@@ -11,6 +11,7 @@ public class MTRPolishPIDSClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+		REGISTRY_CLIENT.setupPackets(new org.mtr.mapping.holder.Identifier(MTRPolishPIDS.MOD_ID, "packet"));
 		REGISTRY_CLIENT.registerBlockEntityRenderer(MTRPolishPIDS.BLOCK_ENTITY_TYPE_PKP_PIDS, RenderPKPPIDS::new);
 		REGISTRY_CLIENT.init();
 	}

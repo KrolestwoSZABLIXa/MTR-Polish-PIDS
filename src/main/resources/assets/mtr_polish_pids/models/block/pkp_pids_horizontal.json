@@ -45,8 +45,8 @@
 		},
 		{
 			"__comment": "Smooth Tinted Glass Front and Back Face",
-			"from": [ 5.96, 2.25, 0 ],
-			"to": [ 10.04, 10.75, 15.25 ],
+			"from": [ 6.15, 2.25, 0 ],
+			"to": [ 9.85, 10.75, 15.25 ],
 			"faces": {
 				"north": { "uv": [ 0, 0, 4, 8 ], "texture": "#screen", "cullface": "north" },
 				"east": { "uv": [ 0, 0, 15, 8 ], "texture": "#screen" },
