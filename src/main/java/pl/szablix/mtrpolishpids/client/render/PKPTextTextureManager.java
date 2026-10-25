@@ -204,6 +204,10 @@ public class PKPTextTextureManager {
 			for (int x = 0; x < width; x++) {
 				final int argb = img.getRGB(x, y);
 				final int a = (argb >> 24) & 0xFF;
+				if (a == 0) {
+					nativeImage.setColor(x, y, 0);
+					continue;
+				}
 				final int r = (argb >> 16) & 0xFF;
 				final int g = (argb >> 8) & 0xFF;
 				final int b = argb & 0xFF;
@@ -215,6 +219,7 @@ public class PKPTextTextureManager {
 
 		final NativeImageBackedTexture texture = new NativeImageBackedTexture(nativeImage);
 		texture.upload();
+		texture.setFilter(true, false);
 
 		final String safeId = key.toLowerCase()
 				.replaceAll("[^a-z0-9_.-]", "_");
