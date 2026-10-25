@@ -1,5 +1,6 @@
 @echo off
-title MTR Polish PIDS - Test Environment
+cd /d "%~dp0"
+title MTR Polish PIDS - Test Client
 echo ===================================================
 echo   Uruchamianie klienta testowego Minecraft z modem
 echo   MTR Polish PIDS
@@ -9,13 +10,13 @@ set "JAVA_HOME=C:\Users\SZABLIX\AppData\Roaming\PrismLauncher\java\java-runtime-
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
 echo Wersja Java:
-java -version
+"%JAVA_HOME%\bin\java.exe" -version
 echo.
-echo Kompilacja ewentualnych zmian i start klienta gry...
+echo Kompilacja i start klienta gry Minecraft...
 call gradlew.bat runClient
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo Wystapil blad podczas uruchamiania klienta.
+    echo Wystapil problem podczas uruchamiania.
     pause
 )
