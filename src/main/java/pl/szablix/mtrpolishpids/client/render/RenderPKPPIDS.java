@@ -1,7 +1,7 @@
-package com.szablix.mtrpolishpids.client.render;
+package pl.szablix.mtrpolishpids.client.render;
 
-import com.szablix.mtrpolishpids.MTRPolishPIDS;
-import com.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
+import pl.szablix.mtrpolishpids.MTRPolishPIDS;
+import pl.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -58,8 +58,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final float SCROLL_SPEED = 2.2f;
 
-	// Layer offset to prevent z-fighting while maintaining a flush, non-floating appearance
-	private static final float LAYER_OFFSET = 0.0015f;
+	// Ultra-flush layer offset to prevent z-fighting while appearing fully glued to the glass surface
+	private static final float LAYER_OFFSET = 0.0001f;
 
 	// Colors directly from the user's JSON specifications
 	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
@@ -232,6 +232,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
+		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 		final float textX = isClockOnRight ? 7.25f : 11.75f;
 
@@ -256,7 +257,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.65f, 1.35f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 			}
 		} else {
-			// Departure Time formatted as HH:mm (Roboto Medium)
+			// Departure Time and Destination aligned on identical vertical coordinate and size
 			final long depEpoch = arrival.getDeparture() > 0 ? arrival.getDeparture() : arrival.getArrival();
 			final long localDepartureMillis = depEpoch - ArrivalsCacheClient.INSTANCE.getMillisOffset();
 			final LocalTime depTime = Instant.ofEpochMilli(localDepartureMillis)
@@ -264,16 +265,19 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					.toLocalTime();
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
-			// Departure time at (displayX, 3.05, w: 5.125, h: 2, align: center)
-			renderText(graphicsHolder, departureTimeText, displayX, 3.05f, 1.45f, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
+			final float headerY = 2.95f;
+			final float headerSize = 1.50f;
+
+			// Departure time at (displayX, headerY, w: 5.125, h: 2, align: center)
+			renderText(graphicsHolder, departureTimeText, displayX, headerY, headerSize, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
 			// Line name at (displayX, 5.65, w: 5.125, h: 0.80, color: black)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.70f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
-			// Destination station with continuous marquee scrolling when exceeding width (Roboto Medium)
+			// Destination station aligned with departure time
 			final String destination = arrival.getDestination();
-			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.90f, 1.50f, COLOR_WHITE, 18.25f, FONT_ROBOTO_MEDIUM);
+			renderScrollingOrStaticText(graphicsHolder, destination, textX, headerY, headerSize, COLOR_WHITE, 18.25f, FONT_ROBOTO_MEDIUM);
 
 			// Intermediate stops (strictly excluding final destination station)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -293,8 +297,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 
 				if (!viaStationNames.isEmpty()) {
-					// Przez/Via: in authentic Roboto Italic (CSDIP standard)
-					renderText(graphicsHolder, "Przez/Via:", textX, 4.85f, 0.60f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, FONT_ROBOTO_ITALIC);
+					// "Przez / Via" with spaces around slash and refined size matching CSDIP
+					renderText(graphicsHolder, "Przez / Via", textX, 4.88f, 0.52f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, FONT_ROBOTO_ITALIC);
 
 					// Combine all intermediate stops into one comma-separated line with continuous marquee scrolling (Roboto Regular)
 					final StringBuilder sb = new StringBuilder();
@@ -304,8 +308,26 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.75f, 0.60f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
+					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.75f, 0.58f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 				}
+			}
+
+			// Red accent bar: real-time delay ("Opóźniony Xmin/delayed Xmin") and announcement message
+			final StringBuilder redBarSb = new StringBuilder();
+			final long delayMinutes = arrival.getDeviation() > 0 ? (arrival.getDeviation() + 30000) / 60000 : 0;
+			if (delayMinutes > 0) {
+				redBarSb.append("Op\u00f3\u017aniony ").append(delayMinutes).append("min/delayed ").append(delayMinutes).append("min");
+			}
+			if (!customMessage.isEmpty()) {
+				if (redBarSb.length() > 0) {
+					redBarSb.append(" | ");
+				}
+				redBarSb.append(customMessage);
+			}
+
+			final String redBarText = redBarSb.toString();
+			if (!redBarText.isEmpty()) {
+				renderScrollingOrStaticText(graphicsHolder, redBarText, displayX + 0.35f, 6.58f, 0.50f, COLOR_WHITE, boxWidth - 0.70f, FONT_ROBOTO_ITALIC);
 			}
 		}
 

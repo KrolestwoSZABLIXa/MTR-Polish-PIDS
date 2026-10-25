@@ -1,5 +1,6 @@
 {
-	"block.mtr_polish_pids.pkp_pids_horizontal": "PKP Platform Edge Display",
+	"block.mtr_polish_pids.pkp_pids_horizontal": "PKP Platform Edge Display - KZŁ",
+	"item.mtr_polish_pids.pkp_pids_horizontal": "PKP Platform Edge Display - KZŁ",
 	"itemGroup.mtr_polish_pids.creative_tab": "MTR - Polish PIDS",
 	"message.mtr_polish_pids.clock_right": "\u00a7b[PKP PIDS]\u00a7r Clock orientation: \u00a7eRight side\u00a7r (towards track)",
 	"message.mtr_polish_pids.clock_left": "\u00a7b[PKP PIDS]\u00a7r Clock orientation: \u00a7eLeft side\u00a7r (towards track)",

@@ -15,10 +15,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.szablix.mtrpolishpids.MTRPolishPIDS"
+      "pl.szablix.mtrpolishpids.MTRPolishPIDS"
     ],
     "client": [
-      "com.szablix.mtrpolishpids.client.MTRPolishPIDSClient"
+      "pl.szablix.mtrpolishpids.client.MTRPolishPIDSClient"
     ]
   },
   "depends": {

@@ -1,6 +1,6 @@
-package com.szablix.mtrpolishpids.block.entity;
+package pl.szablix.mtrpolishpids.block.entity;
 
-import com.szablix.mtrpolishpids.MTRPolishPIDS;
+import pl.szablix.mtrpolishpids.MTRPolishPIDS;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.BlockState;
 import org.mtr.mapping.holder.CompoundTag;

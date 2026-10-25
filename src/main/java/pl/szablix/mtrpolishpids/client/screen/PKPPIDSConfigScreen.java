@@ -1,8 +1,8 @@
-package com.szablix.mtrpolishpids.client.screen;
+package pl.szablix.mtrpolishpids.client.screen;
 
-import com.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
-import com.szablix.mtrpolishpids.client.MTRPolishPIDSClient;
-import com.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock;
+import pl.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
+import pl.szablix.mtrpolishpids.client.MTRPolishPIDSClient;
+import pl.szablix.mtrpolishpids.packet.PacketUpdatePKPPIDSClock;
 import org.mtr.mapping.holder.BlockEntity;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.ClickableWidget;

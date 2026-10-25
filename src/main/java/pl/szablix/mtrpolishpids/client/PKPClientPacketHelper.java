@@ -1,6 +1,6 @@
-package com.szablix.mtrpolishpids.client;
+package pl.szablix.mtrpolishpids.client;
 
-import com.szablix.mtrpolishpids.client.screen.PKPPIDSConfigScreen;
+import pl.szablix.mtrpolishpids.client.screen.PKPPIDSConfigScreen;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.MinecraftClient;
 import org.mtr.mapping.holder.Screen;

@@ -1,7 +1,7 @@
-package com.szablix.mtrpolishpids.client;
+package pl.szablix.mtrpolishpids.client;
 
-import com.szablix.mtrpolishpids.MTRPolishPIDS;
-import com.szablix.mtrpolishpids.client.render.RenderPKPPIDS;
+import pl.szablix.mtrpolishpids.MTRPolishPIDS;
+import pl.szablix.mtrpolishpids.client.render.RenderPKPPIDS;
 import net.fabricmc.api.ClientModInitializer;
 import org.mtr.mapping.registry.RegistryClient;
 

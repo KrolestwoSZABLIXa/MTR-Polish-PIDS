@@ -1,6 +1,6 @@
-package com.szablix.mtrpolishpids.packet;
+package pl.szablix.mtrpolishpids.packet;
 
-import com.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
+import pl.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
 import org.mtr.mapping.holder.BlockEntity;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.holder.Direction;

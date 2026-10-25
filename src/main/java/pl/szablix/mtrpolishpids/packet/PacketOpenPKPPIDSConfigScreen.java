@@ -1,6 +1,6 @@
-package com.szablix.mtrpolishpids.packet;
+package pl.szablix.mtrpolishpids.packet;
 
-import com.szablix.mtrpolishpids.client.PKPClientPacketHelper;
+import pl.szablix.mtrpolishpids.client.PKPClientPacketHelper;
 import org.mtr.mapping.holder.BlockPos;
 import org.mtr.mapping.registry.PacketHandler;
 import org.mtr.mapping.tool.PacketBufferReceiver;
