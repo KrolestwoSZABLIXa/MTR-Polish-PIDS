@@ -204,7 +204,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
-		final float textX = isClockOnRight ? 7.25f : 11.75f;
+		final float textX = isClockOnRight ? 7.50f : 12.00f;
 
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final String platformName = arrival != null ? arrival.getPlatformName() : "";
@@ -218,8 +218,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 68f, Color.WHITE);
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.30f, 2.40f, 18.25f, HorizontalAlignment.LEFT);
+				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 62f, Color.WHITE);
+				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.35f, 2.25f, 18.00f, HorizontalAlignment.LEFT);
 			}
 		} else {
 			// Departure Time
@@ -230,8 +230,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					.toLocalTime();
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
-			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 72f, Color.WHITE);
-			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.40f, 2.65f, 5.125f, HorizontalAlignment.CENTER);
+			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
+			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.65f, 2.35f, 5.125f, HorizontalAlignment.CENTER);
 
 			// Train Line / Route Number on white badge (black text)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
@@ -242,8 +242,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 			// Destination Station
 			final String destination = arrival.getDestination();
-			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 72f, Color.WHITE);
-			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.40f, 2.65f, 18.25f, HorizontalAlignment.LEFT);
+			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
+			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.65f, 2.35f, 18.00f, HorizontalAlignment.LEFT);
 
 			// Intermediate stops (Przez / Via)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -276,7 +276,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						sb.append(viaStationNames.get(j));
 					}
 					final PKPTextTextureManager.DynamicTextTexture viaStopsTex = PKPTextTextureManager.getText("via_stops", sb.toString(), PKPTextTextureManager.getRobotoRegular(), 44f, Color.WHITE);
-					renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, viaStopsTex, textX, 5.52f, 1.05f, 18.25f, HorizontalAlignment.LEFT);
+					renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, viaStopsTex, textX, 5.52f, 1.05f, 18.00f, HorizontalAlignment.LEFT);
 				}
 			}
 
