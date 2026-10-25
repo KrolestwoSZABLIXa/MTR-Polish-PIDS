@@ -222,9 +222,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.35f, 2.25f, 18.00f, HorizontalAlignment.LEFT);
 			}
 		} else {
-			// Departure Time
+			// Scheduled Departure Time (fixed timetable time, unshifted by real-time delay)
 			final long depEpoch = arrival.getDeparture() > 0 ? arrival.getDeparture() : arrival.getArrival();
-			final long localDepartureMillis = depEpoch - ArrivalsCacheClient.INSTANCE.getMillisOffset();
+			final long scheduledEpoch = depEpoch - arrival.getDeviation();
+			final long localDepartureMillis = scheduledEpoch - ArrivalsCacheClient.INSTANCE.getMillisOffset();
 			final LocalTime depTime = Instant.ofEpochMilli(localDepartureMillis)
 					.atZone(ZoneId.systemDefault())
 					.toLocalTime();
