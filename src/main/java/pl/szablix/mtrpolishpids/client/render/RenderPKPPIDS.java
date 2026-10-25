@@ -307,7 +307,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 5);
 			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-			IDrawing.drawTexture(graphicsHolder, x, y, x + w, y + h, u1, v1, u2, v2, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
 
 			graphicsHolder.pop();
 		});
