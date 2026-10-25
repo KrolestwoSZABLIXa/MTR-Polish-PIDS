@@ -149,8 +149,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
-		final float clockCenterY = 4.5f;
-		final float clockRadius = 1.85f;
+		final float clockCenterY = 5.0f;
+		final float clockRadius = 1.90f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -165,17 +165,17 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 1: Blue arrival badge: w = 23.5, h = 4.875
+		// Layer 1: Blue arrival badge: w = 23.5, h = 4.35 (vertically centered with clock at Y = 5.0)
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
-		IDrawing.drawTexture(graphicsHolder, displayX, 2.625f, 0, displayX + boxWidth, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 2: White box under time for line name & red accent line
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, displayX + boxWidth, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 4: Real-time clock hands
@@ -213,8 +213,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
 		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
-		final float clockCenterY = 4.5f;
-		final float clockRadius = 1.85f;
+		final float clockCenterY = 5.0f;
+		final float clockRadius = 1.90f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -242,18 +242,18 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Platform info header (top bar) strictly matching PKP Ipi-1 (Myriad Pro)
+		// Platform info header (top bar) strictly matching PKP Ipi-1 (Myriad Pro) with clearance from casing
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final String platformName = arrival != null ? arrival.getPlatformName() : "";
-		renderText(graphicsHolder, "peron  " + platformName, 13.125f, 0.75f, 1.0f, COLOR_WHITE, 8f, HorizontalAlignment.LEFT, FONT_MYRIAD_REGULAR);
-		renderText(graphicsHolder, "platform", 13.125f, 1.875f, 0.55f, COLOR_WHITE, 3.375f, HorizontalAlignment.LEFT, FONT_MYRIAD_ITALIC);
+		renderText(graphicsHolder, "peron  " + platformName, 13.125f, 0.95f, 1.0f, COLOR_WHITE, 8f, HorizontalAlignment.LEFT, FONT_MYRIAD_REGULAR);
+		renderText(graphicsHolder, "platform", 13.125f, 2.05f, 0.55f, COLOR_WHITE, 3.375f, HorizontalAlignment.LEFT, FONT_MYRIAD_ITALIC);
 
 		final String customMessage = entity.getMessage(0);
 		final boolean hideArrival = entity.getHideArrival(0);
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
+				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.65f, 1.35f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 			}
 		} else {
 			// Departure Time formatted as HH:mm (Roboto Medium)
@@ -264,16 +264,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					.toLocalTime();
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
-			// Departure time at (displayX, 2.85, w: 5.125, h: 2, align: center)
-			renderText(graphicsHolder, departureTimeText, displayX, 2.85f, 1.5f, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
+			// Departure time at (displayX, 3.05, w: 5.125, h: 2, align: center)
+			renderText(graphicsHolder, departureTimeText, displayX, 3.05f, 1.45f, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
-			// Line name at (displayX, 5.75, w: 5.125, h: 0.875, color: black)
+			// Line name at (displayX, 5.65, w: 5.125, h: 0.80, color: black)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
-			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
+			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.70f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
 			// Destination station with continuous marquee scrolling when exceeding width (Roboto Medium)
 			final String destination = arrival.getDestination();
-			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, FONT_ROBOTO_MEDIUM);
+			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.90f, 1.50f, COLOR_WHITE, 18.25f, FONT_ROBOTO_MEDIUM);
 
 			// Intermediate stops (strictly excluding final destination station)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -304,7 +304,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
+					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.75f, 0.60f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 				}
 			}
 		}
@@ -316,11 +316,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		if (text == null || text.isEmpty()) {
 			return text;
 		}
-		// Fix known sans-serif colliding pairs (such as 'uj' in Polish station names) using dedicated hair-space provider
+		// Fix known sans-serif colliding pairs (such as 'uj' and 'Ry' in Polish station names) using dedicated hair-space provider
 		return text.replace("uj", "u\u200Aj")
 				   .replace("uJ", "u\u200AJ")
 				   .replace("Uj", "U\u200Aj")
-				   .replace("UJ", "U\u200AJ");
+				   .replace("UJ", "U\u200AJ")
+				   .replace("Ry", "R\u200Ay")
+				   .replace("ry", "r\u200Ay")
+				   .replace("RY", "R\u200AY")
+				   .replace("rY", "r\u200AY");
 	}
 
 	private static MutableText getStyledText(String text, Identifier font) {
@@ -385,9 +389,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		// Text exceeds available width: continuous marquee ticker with ~1.5 to 2 spaces gap
+		// Text exceeds available width: continuous marquee ticker with clear separation gap
 		final float spaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", font)) * scale;
-		final float gapWidth = spaceWidth * 2.5f;
+		final float gapWidth = spaceWidth * 6.0f;
 		final float cycleWidth = textWidth + gapWidth;
 
 		final double timeSec = System.currentTimeMillis() / 1000.0;
