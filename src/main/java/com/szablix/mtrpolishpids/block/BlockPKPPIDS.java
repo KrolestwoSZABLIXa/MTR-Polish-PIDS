@@ -38,9 +38,10 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 
 	@Override
 	public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		final VoxelShape shape1 = IBlock.getVoxelShapeByDirection(6, 0, 0, 10, 11, 16, IBlock.getStatePropertySafe(state, FACING));
-		final VoxelShape shape2 = IBlock.getVoxelShapeByDirection(7.5, 11, 12.5, 8.5, 16, 13.5, IBlock.getStatePropertySafe(state, FACING));
-		return VoxelShapes.union(shape1, shape2);
+		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
+		final VoxelShape casing = IBlock.getVoxelShapeByDirection(6, 2, 0, 10, 11, 16, facing);
+		final VoxelShape pole = IBlock.getVoxelShapeByDirection(7.25, 11, 11.5, 8.75, 16, 13.5, facing);
+		return VoxelShapes.union(casing, pole);
 	}
 
 	@Override

@@ -1,42 +1,92 @@
 {
 	"textures": {
-		"particle": "mtr:block/metal",
-		"case": "mtr:block/metal",
-		"back": "mtr:block/black"
+		"particle": "mtr_polish_pids:block/pkp_case_navy",
+		"case": "mtr_polish_pids:block/pkp_case_navy",
+		"screen": "mtr_polish_pids:block/pkp_screen_bg",
+		"mount": "mtr_polish_pids:block/pkp_mount"
 	},
 	"elements": [
 		{
-			"__comment": "Main case",
-			"from": [ 6, 0, 0 ],
+			"__comment": "Main Casing Body",
+			"from": [ 6, 2, 0 ],
 			"to": [ 10, 11, 16 ],
 			"faces": {
-				"down": { "texture": "#case", "cullface": "down" },
-				"up": { "texture": "#case" },
-				"south": { "texture": "#case", "cullface": "south" },
-				"north": { "texture": "#case", "cullface": "north" },
-				"east": { "texture": "#case" },
-				"west": { "texture": "#case" }
+				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"south": { "uv": [ 0, 0, 4, 9 ], "texture": "#case", "cullface": "south" },
+				"north": { "uv": [ 0, 0, 4, 9 ], "texture": "#case", "cullface": "north" },
+				"east": { "uv": [ 0, 0, 16, 9 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 9 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Mounting Pole",
-			"from": [ 7.5, 11, 12.5 ],
-			"to": [ 8.5, 16, 13.5 ],
+			"__comment": "Top Bezel",
+			"from": [ 5.85, 10.2, 0 ],
+			"to": [ 10.15, 11.0, 16 ],
 			"faces": {
-				"up": { "texture": "#case", "cullface": "up" },
-				"north": { "texture": "#case" },
-				"south": { "texture": "#case" },
-				"east": { "texture": "#case" },
-				"west": { "texture": "#case" }
+				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
+				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
 			}
 		},
 		{
-			"__comment": "Display Screen Surface (Front & Back)",
-			"from": [ 5.95, 0.5, 0.25 ],
-			"to": [ 10.05, 10.5, 15.75 ],
+			"__comment": "Bottom Bezel",
+			"from": [ 5.85, 2.0, 0 ],
+			"to": [ 10.15, 2.8, 16 ],
 			"faces": {
-				"east": { "texture": "#back" },
-				"west": { "texture": "#back" }
+				"down": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"up": { "uv": [ 0, 0, 16, 4 ], "texture": "#case" },
+				"south": { "uv": [ 0, 0, 4, 1 ], "texture": "#case" },
+				"north": { "uv": [ 0, 0, 4, 1 ], "texture": "#case", "cullface": "north" },
+				"east": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 16, 1 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Outer End Bezel",
+			"from": [ 5.85, 2.8, 15.0 ],
+			"to": [ 10.15, 10.2, 16.0 ],
+			"faces": {
+				"south": { "uv": [ 0, 0, 4, 7 ], "texture": "#case", "cullface": "south" },
+				"north": { "uv": [ 0, 0, 4, 7 ], "texture": "#case" },
+				"east": { "uv": [ 0, 0, 1, 7 ], "texture": "#case" },
+				"west": { "uv": [ 0, 0, 1, 7 ], "texture": "#case" }
+			}
+		},
+		{
+			"__comment": "Recessed LCD Screen Panel",
+			"from": [ 5.92, 2.6, 0 ],
+			"to": [ 10.08, 10.4, 15.2 ],
+			"faces": {
+				"east": { "uv": [ 0, 0, 15, 8 ], "texture": "#screen" },
+				"west": { "uv": [ 0, 0, 15, 8 ], "texture": "#screen" }
+			}
+		},
+		{
+			"__comment": "Ceiling Mounting Pole",
+			"from": [ 7.25, 11, 11.75 ],
+			"to": [ 8.75, 16, 13.25 ],
+			"faces": {
+				"up": { "uv": [ 0, 0, 2, 2 ], "texture": "#mount", "cullface": "up" },
+				"north": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
+				"south": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
+				"east": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" },
+				"west": { "uv": [ 0, 0, 2, 5 ], "texture": "#mount" }
+			}
+		},
+		{
+			"__comment": "Mount Bracket Flange",
+			"from": [ 6.75, 11.0, 11.25 ],
+			"to": [ 9.25, 11.6, 13.75 ],
+			"faces": {
+				"up": { "uv": [ 0, 0, 3, 3 ], "texture": "#mount" },
+				"north": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
+				"south": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
+				"east": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" },
+				"west": { "uv": [ 0, 0, 3, 1 ], "texture": "#mount" }
 			}
 		}
 	]
