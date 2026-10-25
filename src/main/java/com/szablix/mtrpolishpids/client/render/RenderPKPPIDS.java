@@ -46,7 +46,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final Identifier TEXTURE_WHITE = new Identifier("mtr", "textures/block/white.png");
 	private static final Identifier TEXTURE_CLOCK_FACE = new Identifier(MTRPolishPIDS.MOD_ID, "textures/block/pkp_clock_face.png");
-	private static final Identifier FONT_PKP = new Identifier(MTRPolishPIDS.MOD_ID, "pkp");
+
+	// Authentic PKP PLK Typography:
+	// - Screen CSDIP displays: Roboto (Medium, Regular, Italic)
+	// - Static Casing Plate (Ipi-1): Myriad Pro (Regular, Italic)
+	private static final Identifier FONT_ROBOTO_MEDIUM = new Identifier(MTRPolishPIDS.MOD_ID, "roboto_medium");
+	private static final Identifier FONT_ROBOTO_REGULAR = new Identifier(MTRPolishPIDS.MOD_ID, "roboto_regular");
+	private static final Identifier FONT_ROBOTO_ITALIC = new Identifier(MTRPolishPIDS.MOD_ID, "roboto_italic");
+	private static final Identifier FONT_MYRIAD_REGULAR = new Identifier(MTRPolishPIDS.MOD_ID, "myriad_pro_regular");
+	private static final Identifier FONT_MYRIAD_ITALIC = new Identifier(MTRPolishPIDS.MOD_ID, "myriad_pro_italic");
 
 	private static final float SCROLL_SPEED = 2.2f;
 
@@ -234,21 +242,21 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Platform info header (top bar) strictly matching JSON (x: 13.125, y: 0.75 / 1.875)
+		// Platform info header (top bar) strictly matching PKP Ipi-1 (Myriad Pro)
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final String platformName = arrival != null ? arrival.getPlatformName() : "";
-		renderText(graphicsHolder, "peron  " + platformName, 13.125f, 0.75f, 1.0f, COLOR_WHITE, 8f, HorizontalAlignment.LEFT, false);
-		renderText(graphicsHolder, "platform", 13.125f, 1.875f, 0.55f, COLOR_WHITE, 3.375f, HorizontalAlignment.LEFT, true);
+		renderText(graphicsHolder, "peron  " + platformName, 13.125f, 0.75f, 1.0f, COLOR_WHITE, 8f, HorizontalAlignment.LEFT, FONT_MYRIAD_REGULAR);
+		renderText(graphicsHolder, "platform", 13.125f, 1.875f, 0.55f, COLOR_WHITE, 3.375f, HorizontalAlignment.LEFT, FONT_MYRIAD_ITALIC);
 
 		final String customMessage = entity.getMessage(0);
 		final boolean hideArrival = entity.getHideArrival(0);
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, false);
+				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 			}
 		} else {
-			// Departure Time formatted as HH:mm
+			// Departure Time formatted as HH:mm (Roboto Medium)
 			final long depEpoch = arrival.getDeparture() > 0 ? arrival.getDeparture() : arrival.getArrival();
 			final long localDepartureMillis = depEpoch - ArrivalsCacheClient.INSTANCE.getMillisOffset();
 			final LocalTime depTime = Instant.ofEpochMilli(localDepartureMillis)
@@ -257,15 +265,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
 			// Departure time at (displayX, 2.85, w: 5.125, h: 2, align: center)
-			renderText(graphicsHolder, departureTimeText, displayX, 2.85f, 1.5f, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, false);
+			renderText(graphicsHolder, departureTimeText, displayX, 2.85f, 1.5f, COLOR_WHITE, 5.125f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
 			// Line name at (displayX, 5.75, w: 5.125, h: 0.875, color: black)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
-			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, false);
+			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, FONT_ROBOTO_MEDIUM);
 
-			// Destination station with continuous marquee scrolling when exceeding width
+			// Destination station with continuous marquee scrolling when exceeding width (Roboto Medium)
 			final String destination = arrival.getDestination();
-			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, false);
+			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, FONT_ROBOTO_MEDIUM);
 
 			// Intermediate stops (strictly excluding final destination station)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -285,10 +293,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 
 				if (!viaStationNames.isEmpty()) {
-					// Przez/Via: in italic (slightly smaller, authentic typography)
-					renderText(graphicsHolder, "Przez/Via:", textX, 4.85f, 0.60f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, true);
+					// Przez/Via: in authentic Roboto Italic (CSDIP standard)
+					renderText(graphicsHolder, "Przez/Via:", textX, 4.85f, 0.60f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, FONT_ROBOTO_ITALIC);
 
-					// Combine all intermediate stops into one comma-separated line with continuous marquee scrolling
+					// Combine all intermediate stops into one comma-separated line with continuous marquee scrolling (Roboto Regular)
 					final StringBuilder sb = new StringBuilder();
 					for (int j = 0; j < viaStationNames.size(); j++) {
 						if (j > 0) {
@@ -296,7 +304,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, false);
+					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, FONT_ROBOTO_REGULAR);
 				}
 			}
 		}
@@ -304,15 +312,23 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
-	private static MutableText getStyledText(String text, boolean italic) {
-		Style style = Style.getEmptyMapped().withFont(FONT_PKP);
-		if (italic) {
-			style = style.withItalic(Boolean.TRUE);
+	private static String applyKerning(String text) {
+		if (text == null || text.isEmpty()) {
+			return text;
 		}
-		return TextHelper.setStyle(TextHelper.literal(text), style);
+		// Fix known sans-serif colliding pairs (such as 'uj' in Polish station names) using dedicated hair-space provider
+		return text.replace("uj", "u\u200Aj")
+				   .replace("uJ", "u\u200AJ")
+				   .replace("Uj", "U\u200Aj")
+				   .replace("UJ", "U\u200AJ");
 	}
 
-	private static void drawClippedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float minX, float maxX) {
+	private static MutableText getStyledText(String text, Identifier font) {
+		final Style style = Style.getEmptyMapped().withFont(font);
+		return TextHelper.setStyle(TextHelper.literal(applyKerning(text)), style);
+	}
+
+	private static void drawClippedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, Identifier font, float minX, float maxX) {
 		if (text == null || text.isEmpty() || FIELD_MATRIX_STACK == null) {
 			return;
 		}
@@ -336,7 +352,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			matrixStack.scale(scale, scale, 1.0f);
 
 			textRenderer.draw(
-					(net.minecraft.text.Text) getStyledText(text, italic).data,
+					(net.minecraft.text.Text) getStyledText(text, font).data,
 					0f,
 					0f,
 					color | ARGB_BLACK,
@@ -355,22 +371,22 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		}
 	}
 
-	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, boolean italic) {
+	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, Identifier font) {
 		if (text == null || text.isEmpty()) {
 			return;
 		}
 
 		final float scale = size / 8f;
-		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, italic)) * scale;
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, font)) * scale;
 
 		// If it fits within the display width, render statically with normal size (no squashing)
 		if (textWidth <= availableWidth) {
-			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.LEFT, italic);
+			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.LEFT, font);
 			return;
 		}
 
 		// Text exceeds available width: continuous marquee ticker with ~1.5 to 2 spaces gap
-		final float spaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", italic)) * scale;
+		final float spaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", font)) * scale;
 		final float gapWidth = spaceWidth * 2.5f;
 		final float cycleWidth = textWidth + gapWidth;
 
@@ -380,15 +396,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		float copyStartX = -scrollOffset;
 		while (copyStartX < availableWidth) {
 			if (copyStartX + textWidth > 0) {
-				drawClippedText(graphicsHolder, text, x + copyStartX, y, size, color, italic, -copyStartX, availableWidth - copyStartX);
+				drawClippedText(graphicsHolder, text, x + copyStartX, y, size, color, font, -copyStartX, availableWidth - copyStartX);
 			}
 			copyStartX += cycleWidth;
 		}
 	}
 
-	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, boolean italic) {
+	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, Identifier font) {
 		final float scale = size / 8f;
-		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, italic)) * scale;
+		final float textWidth = GraphicsHolder.getTextWidth(getStyledText(text, font)) * scale;
 		float drawX = x;
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 5.0f);
@@ -396,7 +412,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate(drawX, y, 0);
 			graphicsHolder.scale(textWidth == 0 ? 1 : availableWidth / textWidth, 1, 1);
 			graphicsHolder.scale(scale, scale, 1);
-			graphicsHolder.drawText(getStyledText(text, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(getStyledText(text, font), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
 		} else {
 			if (align == HorizontalAlignment.CENTER) {
 				drawX += (availableWidth - textWidth) / 2;
@@ -405,7 +421,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 			graphicsHolder.translate(drawX, y, 0);
 			graphicsHolder.scale(scale, scale, 1);
-			graphicsHolder.drawText(getStyledText(text, italic), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(getStyledText(text, font), 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
 		}
 		graphicsHolder.pop();
 	}

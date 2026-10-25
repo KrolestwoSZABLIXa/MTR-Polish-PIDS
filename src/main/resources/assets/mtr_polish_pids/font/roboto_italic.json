@@ -1,0 +1,24 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "\u200a": 1.2
+      }
+    },
+    {
+      "type": "ttf",
+      "file": "mtr_polish_pids:roboto_italic.ttf",
+      "size": 12.0,
+      "oversample": 8.0
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/space"
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:include/default"
+    }
+  ]
+}
