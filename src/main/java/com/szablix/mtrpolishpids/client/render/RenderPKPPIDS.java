@@ -40,8 +40,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final Identifier TEXTURE_CLOCK_FACE = new Identifier(MTRPolishPIDS.MOD_ID, "textures/block/pkp_clock_face.png");
 	private static final Identifier FONT_MTR = new Identifier("mtr", "mtr");
 
-	private static final int STATIONS_PER_PAGE = 3;
-	private static final int SWITCH_PAGE_TICKS = 120;
+	private static final float SCROLL_SPEED = 2.2f;
 
 	// Layer offset to prevent z-fighting while maintaining a flush, non-floating appearance
 	private static final float LAYER_OFFSET = 0.0015f;
@@ -221,7 +220,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				renderText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
+				renderScrollingOrStaticText(graphicsHolder, customMessage, textX, 3.5f, 1.35f, COLOR_WHITE, 18.25f, false);
 			}
 		} else {
 			// Departure Time formatted as HH:mm
@@ -239,9 +238,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			renderText(graphicsHolder, lineName, displayX + 0.2f, 5.8f, 0.75f, COLOR_BLACK, 4.725f, HorizontalAlignment.CENTER, false);
 
-			// Destination at (textX, 2.625, w: 18.25, h: 2)
+			// Destination station with marquee scrolling when exceeding width
 			final String destination = arrival.getDestination();
-			renderText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
+			renderScrollingOrStaticText(graphicsHolder, destination, textX, 2.7f, 1.55f, COLOR_WHITE, 18.25f, false);
 
 			// Intermediate stops (strictly excluding final destination station)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -264,17 +263,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					// Przez/Via: in italic (slightly smaller, authentic typography)
 					renderText(graphicsHolder, "Przez/Via:", textX, 4.85f, 0.60f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, true);
 
-					final int pageCount = (int) Math.max(1, Math.ceil(viaStationNames.size() / (float) STATIONS_PER_PAGE));
-					final int currentPage = (int) (Math.floor(InitClient.getGameTick() / SWITCH_PAGE_TICKS) % pageCount);
+					// Combine all intermediate stops into one comma-separated line with continuous marquee scrolling
 					final StringBuilder sb = new StringBuilder();
-					final int startIdx = currentPage * STATIONS_PER_PAGE;
-					for (int j = startIdx; j < Math.min(startIdx + STATIONS_PER_PAGE, viaStationNames.size()); j++) {
-						if (sb.length() > 0) {
+					for (int j = 0; j < viaStationNames.size(); j++) {
+						if (j > 0) {
 							sb.append(", ");
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, HorizontalAlignment.LEFT, false);
+					renderScrollingOrStaticText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 18.25f, false);
 				}
 			}
 		}
@@ -288,6 +285,80 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			style = style.withItalic(Boolean.TRUE);
 		}
 		return TextHelper.setStyle(TextHelper.literal(text), style);
+	}
+
+	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, boolean italic) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+
+		final float scale = size / 8f;
+		final MutableText fullStyledText = getStyledText(text, italic);
+		final float textWidth = GraphicsHolder.getTextWidth(fullStyledText) * scale;
+
+		// If it fits within the display width, render statically with normal size (no squashing)
+		if (textWidth <= availableWidth) {
+			renderText(graphicsHolder, text, x, y, size, color, availableWidth, HorizontalAlignment.LEFT, italic);
+			return;
+		}
+
+		// Text exceeds available width: continuous marquee ticker with ~1 to 1.5 characters gap
+		final float charSpaceWidth = GraphicsHolder.getTextWidth(getStyledText(" ", italic)) * scale;
+		final float gapWidth = charSpaceWidth * 2.5f; // ~1.3 to 1.5 characters gap
+		final float cycleWidth = textWidth + gapWidth;
+
+		final double timeSec = System.currentTimeMillis() / 1000.0;
+		final float scrollOffset = (float) ((timeSec * SCROLL_SPEED) % cycleWidth);
+
+		final int len = text.length();
+		final float[] prefixWidths = new float[len + 1];
+		prefixWidths[0] = 0f;
+		for (int i = 1; i <= len; i++) {
+			prefixWidths[i] = GraphicsHolder.getTextWidth(getStyledText(text.substring(0, i), italic)) * scale;
+		}
+
+		graphicsHolder.push();
+		graphicsHolder.translate(x, y, -LAYER_OFFSET * 5);
+
+		float copyStartX = -scrollOffset;
+		while (copyStartX < availableWidth) {
+			if (copyStartX + textWidth > 0) {
+				renderVisibleSlice(graphicsHolder, text, prefixWidths, copyStartX, scale, color, availableWidth, italic);
+			}
+			copyStartX += cycleWidth;
+		}
+
+		graphicsHolder.pop();
+	}
+
+	private static void renderVisibleSlice(GraphicsHolder graphicsHolder, String text, float[] prefixWidths, float copyStartX, float scale, int color, float availableWidth, boolean italic) {
+		final int len = text.length();
+		int firstChar = -1;
+		int lastChar = -1;
+
+		for (int i = 0; i < len; i++) {
+			final float charLeft = copyStartX + prefixWidths[i];
+			final float charRight = copyStartX + prefixWidths[i + 1];
+
+			if (charRight > 0 && charLeft >= -0.5f && charLeft < availableWidth && charRight <= availableWidth + 0.4f) {
+				if (firstChar == -1) {
+					firstChar = i;
+				}
+				lastChar = i + 1;
+			}
+		}
+
+		if (firstChar != -1 && lastChar > firstChar) {
+			final String visibleText = text.substring(firstChar, lastChar);
+			final MutableText styledSlice = getStyledText(visibleText, italic);
+			final float drawX = copyStartX + prefixWidths[firstChar];
+
+			graphicsHolder.push();
+			graphicsHolder.translate(drawX, 0, 0);
+			graphicsHolder.scale(scale, scale, 1);
+			graphicsHolder.drawText(styledSlice, 0, 0, color | ARGB_BLACK, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.pop();
+		}
 	}
 
 	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, boolean italic) {
