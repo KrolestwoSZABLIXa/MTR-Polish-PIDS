@@ -87,18 +87,41 @@ public class PKPTextTextureManager {
 	}
 
 	/**
+	 * Extracts the first platform number/identifier before space, dot, slash, etc. (e.g. "1 tor 1" -> "1", "1.1" -> "1").
+	 */
+	public static String parsePlatformNumber(String raw) {
+		if (raw == null) {
+			return "";
+		}
+		final String trimmed = raw.trim();
+		if (trimmed.isEmpty()) {
+			return "";
+		}
+		final String firstToken = trimmed.split("[\\s.,/\\\\_\\-]+")[0];
+		final java.util.regex.Matcher m = java.util.regex.Pattern.compile("^(\\d+[a-zA-Z]?)").matcher(firstToken);
+		if (m.find()) {
+			return m.group(1);
+		}
+		final java.util.regex.Matcher anyNum = java.util.regex.Pattern.compile("(\\d+[a-zA-Z]?)").matcher(trimmed);
+		if (anyNum.find()) {
+			return anyNum.group(1);
+		}
+		return firstToken;
+	}
+
+	/**
 	 * Renders casing plate text: "peron X" (Myriad Pro Regular) and "platform" (Myriad Pro Italic).
 	 */
 	public static DynamicTextTexture getCasingPlate(String platformName) {
-		final String cleanPlatform = platformName == null ? "" : platformName.trim();
-		final String key = "casing_v3_" + cleanPlatform;
+		final String cleanPlatform = parsePlatformNumber(platformName);
+		final String key = "casing_v4_" + cleanPlatform;
 		final DynamicTextTexture existing = CACHE.get(key);
 		if (existing != null) {
 			existing.touch();
 			return existing;
 		}
 
-		final String line1 = "peron  " + cleanPlatform;
+		final String line1 = cleanPlatform.isEmpty() ? "peron" : "peron  " + cleanPlatform;
 		final String line2 = "platform";
 
 		final float size1 = 90f;

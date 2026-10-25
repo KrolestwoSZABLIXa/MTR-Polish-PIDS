@@ -245,6 +245,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
 			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.65f, 2.35f, 18.00f, HorizontalAlignment.LEFT);
 
+			// "Przez / Via" label - always displayed on board for active arrivals
+			final PKPTextTextureManager.DynamicTextTexture viaLblTex = PKPTextTextureManager.getText("via_lbl", "Przez / Via", PKPTextTextureManager.getRobotoItalic(), 34f, Color.WHITE);
+			renderStaticTexture(entity, blockPos, facing, isBackSide, viaLblTex, textX, 4.90f, 0.80f, 4.875f, HorizontalAlignment.LEFT);
+
 			// Intermediate stops (Przez / Via)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
 			if (simplifiedRoute != null) {
@@ -263,10 +267,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 
 				if (!viaStationNames.isEmpty()) {
-					// "Przez / Via" label
-					final PKPTextTextureManager.DynamicTextTexture viaLblTex = PKPTextTextureManager.getText("via_lbl", "Przez / Via", PKPTextTextureManager.getRobotoItalic(), 34f, Color.WHITE);
-					renderStaticTexture(entity, blockPos, facing, isBackSide, viaLblTex, textX, 4.90f, 0.80f, 4.875f, HorizontalAlignment.LEFT);
-
 					// Intermediate stops list
 					final StringBuilder sb = new StringBuilder();
 					for (int j = 0; j < viaStationNames.size(); j++) {
@@ -280,7 +280,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 			}
 
-			// Red delay bar ticker (only rendered when delayed)
+			// Red delay bar ticker (only rendered when delayed) - scrolls once across screen per pass
 			final long delayMinutes = arrival.getDeviation() > 0 ? (arrival.getDeviation() + 30000) / 60000 : 0;
 			if (delayMinutes > 0) {
 				final StringBuilder redBarSb = new StringBuilder();
@@ -288,8 +288,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				if (!customMessage.isEmpty()) {
 					redBarSb.append(" | ").append(customMessage);
 				}
-				final PKPTextTextureManager.DynamicTextTexture delayTex = PKPTextTextureManager.getText("delay", redBarSb.toString(), PKPTextTextureManager.getRobotoItalic(), 32f, Color.WHITE);
-				renderMarqueeTexture(entity, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.52f, 0.72f, boxWidth - 0.70f);
+				final PKPTextTextureManager.DynamicTextTexture delayTex = PKPTextTextureManager.getText("delay", redBarSb.toString(), PKPTextTextureManager.getRobotoItalic(), 36f, Color.WHITE);
+				renderSinglePassMarquee(entity, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.48f, 0.80f, boxWidth - 0.70f);
 			}
 		}
 	}
@@ -360,6 +360,32 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				scheduleTextTexture(entity, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
 			}
 			copyStartX += cycleW;
+		}
+	}
+
+	private static void renderSinglePassMarquee(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW) {
+		if (tex == null) {
+			return;
+		}
+
+		final float itemW = targetH * tex.getAspectRatio();
+		final float pauseGap = 6.0f; // Gap after leaving the screen before re-entering
+		final float cycleW = windowW + itemW + pauseGap;
+
+		final double timeSec = System.currentTimeMillis() / 1000.0;
+		final float progress = (float) ((timeSec * SCROLL_SPEED) % cycleW);
+
+		final float quadLeft = windowX + windowW - progress;
+		final float quadRight = quadLeft + itemW;
+
+		if (quadRight > windowX && quadLeft < windowX + windowW) {
+			final float clippedLeft = Math.max(quadLeft, windowX);
+			final float clippedRight = Math.min(quadRight, windowX + windowW);
+
+			final float u1 = (clippedLeft - quadLeft) / itemW;
+			final float u2 = (clippedRight - quadLeft) / itemW;
+
+			scheduleTextTexture(entity, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
 		}
 	}
 
