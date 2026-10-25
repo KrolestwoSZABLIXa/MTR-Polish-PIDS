@@ -91,7 +91,7 @@ public class PKPTextTextureManager {
 	 */
 	public static DynamicTextTexture getCasingPlate(String platformName) {
 		final String cleanPlatform = platformName == null ? "" : platformName.trim();
-		final String key = "casing_" + cleanPlatform;
+		final String key = "casing_v3_" + cleanPlatform;
 		final DynamicTextTexture existing = CACHE.get(key);
 		if (existing != null) {
 			existing.touch();
@@ -101,8 +101,8 @@ public class PKPTextTextureManager {
 		final String line1 = "peron  " + cleanPlatform;
 		final String line2 = "platform";
 
-		final float size1 = 60f;
-		final float size2 = 30f;
+		final float size1 = 90f;
+		final float size2 = 45f;
 		final Font f1 = FONT_MYRIAD_REGULAR.deriveFont(Font.PLAIN, size1);
 		final Font f2 = FONT_MYRIAD_ITALIC.deriveFont(Font.PLAIN, size2);
 
@@ -117,10 +117,10 @@ public class PKPTextTextureManager {
 		final int w2 = fm2.stringWidth(line2);
 		gProbe.dispose();
 
-		final int padX = 6;
+		final int padX = 8;
 		final int padY = 2;
 		final int base1 = padY + fm1.getAscent();
-		final int gap = 4;
+		final int gap = 6;
 		final int base2 = base1 + fm1.getDescent() + gap + fm2.getAscent();
 		final int totalH = base2 + fm2.getDescent() + padY;
 		final int totalW = Math.max(w1, w2) + padX * 2;
@@ -146,7 +146,7 @@ public class PKPTextTextureManager {
 	 */
 	public static DynamicTextTexture getText(String keyPrefix, String text, Font font, float fontSize, Color color) {
 		final String safeText = text == null ? "" : text;
-		final String key = keyPrefix + "_" + safeText;
+		final String key = keyPrefix + "_" + (int) fontSize + "_" + safeText;
 		final DynamicTextTexture existing = CACHE.get(key);
 		if (existing != null) {
 			existing.touch();
