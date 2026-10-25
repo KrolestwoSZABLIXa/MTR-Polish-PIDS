@@ -47,7 +47,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final float LAYER_OFFSET = 0.0015f;
 
 	// Colors directly from the user's JSON specifications
-	private static final int COLOR_SCREEN_BG = 0xFF181127;  // color: 1577255
+	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
 	private static final int COLOR_BADGE_BG = 0xFF00075E;   // color: 1886
 	private static final int COLOR_RED_LINE = 0xFFFF0000;   // color: 16711680
 	private static final int COLOR_WHITE = 0xFFFFFFFF;      // color: 16777215
@@ -259,8 +259,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				}
 
 				if (!viaStationNames.isEmpty()) {
-					// Przez/Via: in italic
-					renderText(graphicsHolder, "Przez/Via:", textX, 4.75f, 0.75f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, true);
+					// Przez/Via: in italic (slightly smaller, authentic typography)
+					renderText(graphicsHolder, "Przez/Via:", textX, 4.85f, 0.60f, COLOR_WHITE, 4.875f, HorizontalAlignment.LEFT, true);
 
 					final int pageCount = (int) Math.max(1, Math.ceil(viaStationNames.size() / (float) STATIONS_PER_PAGE));
 					final int currentPage = (int) (Math.floor(InitClient.getGameTick() / SWITCH_PAGE_TICKS) % pageCount);
@@ -268,11 +268,11 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					final int startIdx = currentPage * STATIONS_PER_PAGE;
 					for (int j = startIdx; j < Math.min(startIdx + STATIONS_PER_PAGE, viaStationNames.size()); j++) {
 						if (sb.length() > 0) {
-							sb.append(" - ");
+							sb.append(", ");
 						}
 						sb.append(viaStationNames.get(j));
 					}
-					renderText(graphicsHolder, sb.toString(), textX, 5.75f, 0.75f, COLOR_WHITE, 19.25f, HorizontalAlignment.LEFT, false);
+					renderText(graphicsHolder, sb.toString(), textX, 5.85f, 0.60f, COLOR_WHITE, 19.25f, HorizontalAlignment.LEFT, false);
 				}
 			}
 		}
