@@ -2,6 +2,13 @@ package com.szablix.mtrpolishpids.client.render;
 
 import com.szablix.mtrpolishpids.MTRPolishPIDS;
 import com.szablix.mtrpolishpids.block.entity.BlockEntityPKPPIDS;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix4f;
 import org.mtr.core.data.SimplifiedRoute;
 import org.mtr.core.data.SimplifiedRoutePlatform;
 import org.mtr.core.operation.ArrivalResponse;
@@ -24,6 +31,7 @@ import org.mtr.mod.data.IGui;
 import org.mtr.mod.render.MainRenderer;
 import org.mtr.mod.render.QueuedRenderLayer;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -52,6 +60,24 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final int COLOR_WHITE = 0xFFFFFFFF;      // color: 16777215
 	private static final int COLOR_BLACK = 0xFF000000;      // color: 0
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
+
+	private static final Field FIELD_MATRIX_STACK;
+
+	static {
+		Field ms = null;
+		try {
+			for (Field f : GraphicsHolder.class.getDeclaredFields()) {
+				if (f.getType().equals(MatrixStack.class)) {
+					ms = f;
+					ms.setAccessible(true);
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		FIELD_MATRIX_STACK = ms;
+	}
 
 	public RenderPKPPIDS(Argument dispatcher) {
 		super(dispatcher);
@@ -83,7 +109,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles) on TEXTURE_WHITE in LIGHT layer
+		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer
 		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -91,15 +117,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		});
 
-		// 2. Mask Quads in EXTERIOR layer (writes depth to clip scrolling text pixel-by-pixel as a continuous stream)
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
-			renderSideMasks(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
-			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-				renderSideMasks(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
-			}
-		});
-
-		// 3. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer (in front of mask)
+		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer
 		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -107,7 +125,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		});
 
-		// 4. Text on QueuedRenderLayer.TEXT
+		// 3. Text on QueuedRenderLayer.TEXT
 		MainRenderer.scheduleRender(QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
 			renderSideText(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
@@ -145,13 +163,14 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, displayX, 2.625f, 0, displayX + boxWidth, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 1.5: Red accent line across display area
+		// Layer 2: White box under time for line name & red accent line
 		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1.5f);
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
+		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
 		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, displayX + boxWidth, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 4.5: Real-time clock hands (in front of clock face)
+		// Layer 4: Real-time clock hands
 		final LocalTime now = LocalTime.now();
 		final float hours = now.getHour() % 12f;
 		final float minutes = now.getMinute();
@@ -160,7 +179,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float minuteAngle = (minutes + seconds / 60f) * 6f;
 
 		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 4.5f);
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 4);
 
 		// Hour hand
 		graphicsHolder.push();
@@ -181,43 +200,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
-	private void renderSideMasks(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
-		final boolean clockConfigRight = entity.isClockOnRight();
-		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
-
-		final float displayX = isClockOnRight ? 2.0f : 6.50f;
-		final float textX = isClockOnRight ? 7.25f : 11.75f;
-		final float availableWidth = 18.25f;
-
-		graphicsHolder.push();
-		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
-		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
-		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
-
-		// Depth Mask layer at -LAYER_OFFSET * 3.0f (between scrolling text at * 2 and foreground text at * 5)
-		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 3.0f);
-
-		// Left mask: covers departure time area up to textX
-		IDrawing.drawTexture(graphicsHolder, displayX - 0.2f, 2.625f, 0, textX, 2.625f + 4.875f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
-		IDrawing.drawTexture(graphicsHolder, displayX, 5.75f, 0, displayX + 5.125f, 5.75f + 0.875f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		IDrawing.drawTexture(graphicsHolder, displayX, 6.75f, 0, textX, 6.75f + 0.75f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
-
-		// Right mask: covers from right margin of display text (textX + availableWidth) to the edge of casing
-		if (isClockOnRight) {
-			IDrawing.drawTexture(graphicsHolder, textX + availableWidth, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
-		} else {
-			IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, displayX, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
-			IDrawing.drawTexture(graphicsHolder, textX + availableWidth, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
-		}
-
-		graphicsHolder.pop();
-
-		graphicsHolder.pop();
-	}
-
 	private void renderSideClockFace(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
@@ -230,7 +212,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 4.0f);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
@@ -370,6 +352,64 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		}
 	}
 
+	private static void drawClippedSpacedText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, boolean italic, float extraTracking, float minX, float maxX) {
+		if (text == null || text.isEmpty() || FIELD_MATRIX_STACK == null) {
+			return;
+		}
+
+		try {
+			final MatrixStack matrixStack = (MatrixStack) FIELD_MATRIX_STACK.get(graphicsHolder);
+			if (matrixStack == null) {
+				return;
+			}
+
+			final float scale = size / 8f;
+			final float clipMin = minX / scale;
+			final float clipMax = maxX / scale;
+
+			final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+			final ClippingVertexConsumerProvider clippingProvider = new ClippingVertexConsumerProvider(immediate, clipMin, clipMax);
+			final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+
+			matrixStack.push();
+			matrixStack.translate(x, y, -LAYER_OFFSET * 5.0f);
+			matrixStack.scale(scale, scale, 1.0f);
+
+			float currentX = 0f;
+			final int len = text.length();
+			for (int i = 0; i < len; i++) {
+				final String ch = text.substring(i, i + 1);
+				final float w = GraphicsHolder.getTextWidth(getStyledText(ch, italic));
+
+				// Process glyph if it could intersect clip interval
+				if (currentX + w + 4f > clipMin && currentX - 4f < clipMax) {
+					textRenderer.draw(
+							(net.minecraft.text.Text) getStyledText(ch, italic).data,
+							currentX,
+							0f,
+							color | ARGB_BLACK,
+							false,
+							matrixStack.peek().getPositionMatrix(),
+							clippingProvider,
+							TextRenderer.TextLayerType.NORMAL,
+							0,
+							GraphicsHolder.getDefaultLight()
+					);
+				}
+
+				currentX += w;
+				if (!ch.equals(" ")) {
+					currentX += extraTracking;
+				}
+			}
+
+			immediate.draw();
+			matrixStack.pop();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static void renderScrollingOrStaticText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, boolean italic) {
 		if (text == null || text.isEmpty()) {
 			return;
@@ -393,19 +433,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final double timeSec = System.currentTimeMillis() / 1000.0;
 		final float scrollOffset = (float) ((timeSec * SCROLL_SPEED) % cycleWidth);
 
-		// Rendered as continuous stream behind mask at -LAYER_OFFSET * 2.0f
-		graphicsHolder.push();
-		graphicsHolder.translate(x, y, -LAYER_OFFSET * 2.0f);
-
 		float copyStartX = -scrollOffset;
 		while (copyStartX < availableWidth) {
-			if (copyStartX + textWidth > -availableWidth) {
-				drawSpacedText(graphicsHolder, text, copyStartX, 0, size, color, italic, extraTracking);
+			if (copyStartX + textWidth > 0) {
+				drawClippedSpacedText(graphicsHolder, text, x + copyStartX, y, size, color, italic, extraTracking, -copyStartX, availableWidth - copyStartX);
 			}
 			copyStartX += cycleWidth;
 		}
-
-		graphicsHolder.pop();
 	}
 
 	private static void renderText(GraphicsHolder graphicsHolder, String text, float x, float y, float size, int color, float availableWidth, HorizontalAlignment align, boolean italic) {
@@ -428,5 +462,198 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			drawSpacedText(graphicsHolder, text, drawX, y, size, color, italic, extraTracking);
 		}
 		graphicsHolder.pop();
+	}
+
+	private static class ClippingVertexConsumerProvider implements VertexConsumerProvider {
+		private final VertexConsumerProvider parent;
+		private final float minX;
+		private final float maxX;
+
+		public ClippingVertexConsumerProvider(VertexConsumerProvider parent, float minX, float maxX) {
+			this.parent = parent;
+			this.minX = minX;
+			this.maxX = maxX;
+		}
+
+		@Override
+		public VertexConsumer getBuffer(net.minecraft.client.render.RenderLayer layer) {
+			return new ClippingVertexConsumer(parent.getBuffer(layer), minX, maxX);
+		}
+	}
+
+	private static class ClippingVertexConsumer implements VertexConsumer {
+		private final VertexConsumer parent;
+		private final float clipMinX;
+		private final float clipMaxX;
+
+		private static class Vertex {
+			Matrix4f matrix;
+			float x, y, z;
+			int r, g, b, a;
+			float u, v;
+			int light;
+		}
+
+		private final Vertex[] quad = new Vertex[] { new Vertex(), new Vertex(), new Vertex(), new Vertex() };
+		private int vertexIndex = 0;
+
+		public ClippingVertexConsumer(VertexConsumer parent, float clipMinX, float clipMaxX) {
+			this.parent = parent;
+			this.clipMinX = clipMinX;
+			this.clipMaxX = clipMaxX;
+		}
+
+		@Override
+		public VertexConsumer vertex(double x, double y, double z) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].matrix = null;
+				quad[vertexIndex].x = (float) x;
+				quad[vertexIndex].y = (float) y;
+				quad[vertexIndex].z = (float) z;
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer vertex(Matrix4f matrix, float x, float y, float z) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].matrix = matrix;
+				quad[vertexIndex].x = x;
+				quad[vertexIndex].y = y;
+				quad[vertexIndex].z = z;
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer color(int red, int green, int blue, int alpha) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].r = red;
+				quad[vertexIndex].g = green;
+				quad[vertexIndex].b = blue;
+				quad[vertexIndex].a = alpha;
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer color(float red, float green, float blue, float alpha) {
+			return color((int)(red * 255), (int)(green * 255), (int)(blue * 255), (int)(alpha * 255));
+		}
+
+		@Override
+		public VertexConsumer color(int argb) {
+			return color((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+		}
+
+		@Override
+		public VertexConsumer texture(float u, float v) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].u = u;
+				quad[vertexIndex].v = v;
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer overlay(int u, int v) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer overlay(int overlay) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer light(int u, int v) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].light = (v << 16) | (u & 0xFFFF);
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer light(int light) {
+			if (vertexIndex < 4) {
+				quad[vertexIndex].light = light;
+			}
+			return this;
+		}
+
+		@Override
+		public VertexConsumer normal(float x, float y, float z) {
+			return this;
+		}
+
+		@Override
+		public VertexConsumer normal(org.joml.Matrix3f matrix, float x, float y, float z) {
+			return this;
+		}
+
+		@Override
+		public void fixedColor(int red, int green, int blue, int alpha) {}
+
+		@Override
+		public void unfixColor() {}
+
+		@Override
+		public void next() {
+			vertexIndex++;
+			if (vertexIndex == 4) {
+				clipAndEmit();
+				vertexIndex = 0;
+			}
+		}
+
+		private void clipAndEmit() {
+			final float glyphMinX = quad[0].x;
+			final float glyphMaxX = quad[2].x;
+			final float glyphMinU = quad[0].u;
+			final float glyphMaxU = quad[2].u;
+
+			// If completely outside the visible display window, do not emit any vertices
+			if (glyphMaxX <= clipMinX || glyphMinX >= clipMaxX) {
+				return;
+			}
+
+			final float w = glyphMaxX - glyphMinX;
+			if (w <= 0.0001f) {
+				return;
+			}
+
+			// Sub-pixel clip against left display boundary
+			if (glyphMinX < clipMinX) {
+				final float factor = (clipMinX - glyphMinX) / w;
+				final float clippedU = glyphMinU + factor * (glyphMaxU - glyphMinU);
+				quad[0].x = clipMinX;
+				quad[0].u = clippedU;
+				quad[1].x = clipMinX;
+				quad[1].u = clippedU;
+			}
+
+			// Sub-pixel clip against right display boundary
+			if (glyphMaxX > clipMaxX) {
+				final float factor = (glyphMaxX - clipMaxX) / w;
+				final float clippedU = glyphMaxU - factor * (glyphMaxU - glyphMinU);
+				quad[2].x = clipMaxX;
+				quad[2].u = clippedU;
+				quad[3].x = clipMaxX;
+				quad[3].u = clippedU;
+			}
+
+			for (int i = 0; i < 4; i++) {
+				Vertex v = quad[i];
+				if (v.matrix != null) {
+					parent.vertex(v.matrix, v.x, v.y, v.z);
+				} else {
+					parent.vertex(v.x, v.y, v.z);
+				}
+				parent.color(v.r, v.g, v.b, v.a)
+					  .texture(v.u, v.v)
+					  .light(v.light & 0xFFFF, (v.light >> 16) & 0xFFFF)
+					  .next();
+			}
+		}
 	}
 }
