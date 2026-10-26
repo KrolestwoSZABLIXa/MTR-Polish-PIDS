@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "mtr_polish_pids",
   "version": "${version}",
-  "name": "MTR Polish PIDS",
-  "description": "Polskie tablice Systemu Dynamicznej Informacji Pasa\u017cerskiej (PIDS) dla Minecraft Transit Railway.",
+  "name": "MTR Polish Pack",
+  "description": "Dodatki polskiej infrastruktury kolejowej i drogowej dla Minecraft Transit Railway (MTR).",
   "authors": [
     "SZABLIX"
   ],

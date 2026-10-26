@@ -1,0 +1,8 @@
+{
+	"variants": {
+		"facing=north": { "model": "mtr_polish_pids:block/city_sign" },
+		"facing=east": { "model": "mtr_polish_pids:block/city_sign", "y": 90 },
+		"facing=south": { "model": "mtr_polish_pids:block/city_sign", "y": 180 },
+		"facing=west": { "model": "mtr_polish_pids:block/city_sign", "y": 270 }
+	}
+}

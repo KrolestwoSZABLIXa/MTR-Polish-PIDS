@@ -1,10 +1,18 @@
 {
+	"itemGroup.mtr_polish_pids.creative_tab": "MTR Polish Pack",
 	"block.mtr_polish_pids.pkp_pids_horizontal": "PKP Platform Edge Display - KZŁ",
 	"item.mtr_polish_pids.pkp_pids_horizontal": "PKP Platform Edge Display - KZŁ",
-	"itemGroup.mtr_polish_pids.creative_tab": "MTR - Polish PIDS",
+	"block.mtr_polish_pids.city_sign": "Polish City Sign (E-17a / E-18a)",
+	"item.mtr_polish_pids.city_sign": "Polish City Sign (E-17a / E-18a)",
 	"message.mtr_polish_pids.clock_right": "\u00a7b[PKP PIDS]\u00a7r Clock orientation: \u00a7eRight side\u00a7r (towards track)",
 	"message.mtr_polish_pids.clock_left": "\u00a7b[PKP PIDS]\u00a7r Clock orientation: \u00a7eLeft side\u00a7r (towards track)",
+	"message.mtr_polish_pids.city_sign_e17a": "\u00a7b[MTR Polish Pack]\u00a7r Set: \u00a7aSign E-17a (Town Entrance)\u00a7r: %s",
+	"message.mtr_polish_pids.city_sign_e18a": "\u00a7b[MTR Polish Pack]\u00a7r Set: \u00a7cSign E-18a (Town Exit)\u00a7r: %s",
 	"gui.mtr_polish_pids.clock_side": "Clock Side:",
 	"gui.mtr_polish_pids.clock_right": "Right",
-	"gui.mtr_polish_pids.clock_left": "Left"
+	"gui.mtr_polish_pids.clock_left": "Left",
+	"gui.mtr_polish_pids.city_sign_title": "City Sign Settings",
+	"gui.mtr_polish_pids.city_name": "City Name:",
+	"gui.mtr_polish_pids.end_of_town": "End of Town (Sign E-18a)",
+	"gui.mtr_polish_pids.save": "Save"
 }
