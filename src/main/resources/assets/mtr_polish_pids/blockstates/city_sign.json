@@ -1,8 +1,16 @@
 {
 	"variants": {
-		"facing=north": { "model": "mtr_polish_pids:block/city_sign" },
-		"facing=east": { "model": "mtr_polish_pids:block/city_sign", "y": 90 },
-		"facing=south": { "model": "mtr_polish_pids:block/city_sign", "y": 180 },
-		"facing=west": { "model": "mtr_polish_pids:block/city_sign", "y": 270 }
+		"facing=north,third=lower": { "model": "mtr_polish_pids:block/city_sign" },
+		"facing=north,third=middle": { "model": "mtr_polish_pids:block/city_sign" },
+		"facing=north,third=upper": { "model": "mtr_polish_pids:block/city_sign" },
+		"facing=east,third=lower": { "model": "mtr_polish_pids:block/city_sign", "y": 90 },
+		"facing=east,third=middle": { "model": "mtr_polish_pids:block/city_sign", "y": 90 },
+		"facing=east,third=upper": { "model": "mtr_polish_pids:block/city_sign", "y": 90 },
+		"facing=south,third=lower": { "model": "mtr_polish_pids:block/city_sign", "y": 180 },
+		"facing=south,third=middle": { "model": "mtr_polish_pids:block/city_sign", "y": 180 },
+		"facing=south,third=upper": { "model": "mtr_polish_pids:block/city_sign", "y": 180 },
+		"facing=west,third=lower": { "model": "mtr_polish_pids:block/city_sign", "y": 270 },
+		"facing=west,third=middle": { "model": "mtr_polish_pids:block/city_sign", "y": 270 },
+		"facing=west,third=upper": { "model": "mtr_polish_pids:block/city_sign", "y": 270 }
 	}
 }

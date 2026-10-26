@@ -183,7 +183,7 @@ public class CitySignTextureManager {
 	private static void cleanupCache() {
 		final long now = System.currentTimeMillis();
 		CACHE.entrySet().removeIf(entry -> {
-			if (now - entry.getValue().lastUsedTime > 90_000) {
+			if (now - entry.getValue().lastUsedTime > 600_000) {
 				try {
 					final net.minecraft.util.Identifier mcId = new net.minecraft.util.Identifier(
 							entry.getValue().identifier.getNamespace(),
