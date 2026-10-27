@@ -47,7 +47,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	// Colors directly from authentic PKP PLK CSDIP specifications
 	private static final int COLOR_BADGE_BG = 0xFF000A64;   // Authentic PKP PLK display navy blue (#000a64, exact color on shaders)
 	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
-	private static final int COLOR_WHITE = 0xFFD0D8E8;      // Balanced LCD white: eliminates blinding shader flare/bloom while staying crisp
+	private static final int COLOR_WHITE = 0xFFFFFFFF;      // Crisp 100% white matching dynamic text, zero bloom on LIGHT_2
 	private static final int COLOR_CASING_TEXT = 0xFFD8E0EC;// Painted white lettering for metal casing (non-emissive)
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
 
@@ -81,16 +81,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in EXTERIOR layer (solid albedo, exact #000A64 color without shader distortion)
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT_2 layer (self-illuminated, crisp colors, no shader bloom)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in EXTERIOR layer (crisp dial, no shader washout)
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT_2 layer (self-illuminated crisp dial, matches text brightness)
+		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
@@ -131,15 +131,18 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		// Layer 2: White box under time for line name & red accent line (only rendered when delayed)
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final boolean hideArrival = entity.getHideArrival(0);
-		final long delayMinutes = (arrival != null && !hideArrival && arrival.getDeviation() > 0)
+		final boolean hasArrival = arrival != null && !hideArrival;
+		final long delayMinutes = (hasArrival && arrival.getDeviation() > 0)
 				? (arrival.getDeviation() + 30000) / 60000
 				: 0;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-		IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		if (delayMinutes > 0) {
-			IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+		if (hasArrival) {
+			IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+			if (delayMinutes > 0) {
+				IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+			}
 		}
 		graphicsHolder.pop();
 
@@ -214,7 +217,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
 				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 62f, Color.WHITE);
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, textX, 3.35f, 2.25f, 18.00f, HorizontalAlignment.LEFT);
+				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, displayX + 0.6f, 3.85f, 2.25f, boxWidth - 1.2f, HorizontalAlignment.LEFT);
 			}
 		} else {
 			// Scheduled Departure Time (fixed timetable time, unshifted by real-time delay)
@@ -295,7 +298,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
