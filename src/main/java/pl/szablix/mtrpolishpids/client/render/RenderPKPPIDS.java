@@ -32,7 +32,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final float START_X = 0f;
 	private static final float START_Y = 11.0f;
-	private static final float START_Z = 5.64f;
+	private static final float START_Z = 5.645f;
 	private static final boolean ROTATE_90 = true;
 	private static final float SCALE = 16f;
 
@@ -41,12 +41,12 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final float SCROLL_SPEED = 2.2f;
 
-	// Distinct layer offset (0.0025 blocks = 2.5 mm per layer) to prevent z-fighting at distance
-	private static final float LAYER_OFFSET = 0.0025f;
+	// Ultra-thin layer offset (0.4 mm per layer, 1.2 mm total) so font lies completely flat on the glass
+	private static final float LAYER_OFFSET = 0.0004f;
 
-	// Colors directly from authentic PKP PLK CSDIP specifications
+	// Colors directly from authentic PKP PLK CSDIP specifications (RAL 5002 Ultramarine Blue)
 	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
-	private static final int COLOR_BADGE_BG = 0xFF00075E;   // color: 1886
+	private static final int COLOR_BADGE_BG = 0xFF002EA8;   // Authentic PKP PLK RAL 5002 vibrant display blue
 	private static final int COLOR_RED_LINE = 0xFFFF0000;   // color: 16711680
 	private static final int COLOR_WHITE = 0xFFFFFFFF;      // color: 16777215
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
@@ -121,16 +121,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Layer 0: Screen background
+		// Layer 0: Screen background (confined to 1.25f - 30.75f to preserve the navy blue side casing rims)
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 0);
-		IDrawing.drawTexture(graphicsHolder, 0.2f, 0.75f, 0, 31.8f, 8.375f, 0, Direction.UP, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, 1.25f, 0.75f, 0, 30.75f, 8.375f, 0, Direction.SOUTH, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 1: Blue arrival badge: w = 23.5, h = 4.35 (vertically centered with clock at Y = 5.0)
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
-		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Layer 2: White box under time for line name & red accent line (only rendered when delayed)
@@ -142,13 +142,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		graphicsHolder.push();
 		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-		IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.UP, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, displayX, 5.65f, 0, displayX + 5.125f, 6.45f, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
 		if (delayMinutes > 0) {
-			IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.UP, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
 		}
 		graphicsHolder.pop();
 
-		// Layer 4: Real-time clock hands
+		// Layer 2: Real-time clock hands (on top of Layer 1 clock face)
 		final LocalTime now = LocalTime.now();
 		final float hours = now.getHour() % 12f;
 		final float minutes = now.getMinute();
@@ -157,20 +157,20 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float minuteAngle = (minutes + seconds / 60f) * 6f;
 
 		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 4);
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
 
 		// Hour hand
 		graphicsHolder.push();
 		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
 		graphicsHolder.rotateZDegrees(hourAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.11f, -clockRadius * 0.55f, 0, 0.11f, clockRadius * 0.12f, 0, Direction.UP, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, -0.11f, -clockRadius * 0.55f, 0, 0.11f, clockRadius * 0.12f, 0, Direction.SOUTH, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		// Minute hand
 		graphicsHolder.push();
 		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
 		graphicsHolder.rotateZDegrees(minuteAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.08f, -clockRadius * 0.82f, 0, 0.08f, clockRadius * 0.12f, 0, Direction.UP, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, -0.08f, -clockRadius * 0.82f, 0, 0.08f, clockRadius * 0.12f, 0, Direction.SOUTH, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
 		graphicsHolder.pop();
@@ -190,10 +190,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.SOUTH, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
 
 		graphicsHolder.pop();
 	}
@@ -305,10 +305,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 			graphicsHolder.rotateZDegrees(180);
-			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 5);
+			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
 			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.UP, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
 
 			graphicsHolder.pop();
 		});
