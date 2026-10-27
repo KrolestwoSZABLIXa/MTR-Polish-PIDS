@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "mtr_polish_pids:pkp_pids_horizontal"
+    "mtr_polish_pack:pkp_pids_kzl",
+    "mtr_polish_pack:city_sign"
   ]
 }

@@ -51,10 +51,10 @@ public class PKPPIDSConfigScreen extends PIDSConfigScreen {
 	@Override
 	public void render(GraphicsHolder graphicsHolder, int mouseX, int mouseY, float tickDelta) {
 		super.render(graphicsHolder, mouseX, mouseY, tickDelta);
-		graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pids.clock_side"), 120, 46, -1, false, GraphicsHolder.getDefaultLight());
+		graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.clock_side"), 120, 46, -1, false, GraphicsHolder.getDefaultLight());
 	}
 
 	private String getClockSideKey() {
-		return clockOnRight ? "gui.mtr_polish_pids.clock_right" : "gui.mtr_polish_pids.clock_left";
+		return clockOnRight ? "gui.mtr_polish_pack.clock_right" : "gui.mtr_polish_pack.clock_left";
 	}
 }

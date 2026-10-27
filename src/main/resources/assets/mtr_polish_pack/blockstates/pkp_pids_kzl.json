@@ -1,0 +1,8 @@
+{
+	"variants": {
+		"facing=north": { "model": "mtr_polish_pack:block/pkp_pids_kzl" },
+		"facing=east": { "model": "mtr_polish_pack:block/pkp_pids_kzl", "y": 90 },
+		"facing=south": { "model": "mtr_polish_pack:block/pkp_pids_kzl", "y": 180 },
+		"facing=west": { "model": "mtr_polish_pack:block/pkp_pids_kzl", "y": 270 }
+	}
+}

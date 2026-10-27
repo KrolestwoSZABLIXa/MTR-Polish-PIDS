@@ -62,26 +62,26 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 			gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			gh.rotateYDegrees(-facing.asRotation());
 
-			// Left post (from ground y=0 to y=2.75)
-			drawBoxShaded(gh, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 2.75f, postR, light);
+			// Left post (from ground y=0 to y=2.95)
+			drawBoxShaded(gh, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 2.95f, postR, light);
 
-			// Right post (from ground y=0 to y=2.75)
-			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 2.75f, postR, light);
+			// Right post (from ground y=0 to y=2.95)
+			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 2.95f, postR, light);
 
 			// Horizontal aluminum mounting channels behind the board
 			final float railLeft = -postOffset - 0.20f;
 			final float railRight = postOffset + 0.20f;
-			drawBox(gh, railLeft, 2.00f, 0.040f, railRight, 2.08f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, railLeft, 2.50f, 0.040f, railRight, 2.58f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, railLeft, 2.20f, 0.040f, railRight, 2.28f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, railLeft, 2.70f, 0.040f, railRight, 2.78f, 0.055f, COLOR_RAIL, light);
 
 			// Mounting clamps holding channels to posts
-			drawBox(gh, -postOffset - 0.06f, 1.98f, -0.045f, -postOffset + 0.06f, 2.10f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, -postOffset - 0.06f, 2.48f, -0.045f, -postOffset + 0.06f, 2.60f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.06f, 1.98f, -0.045f, postOffset + 0.06f, 2.10f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.06f, 2.48f, -0.045f, postOffset + 0.06f, 2.60f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, -postOffset - 0.06f, 2.18f, -0.045f, -postOffset + 0.06f, 2.30f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, -postOffset - 0.06f, 2.68f, -0.045f, -postOffset + 0.06f, 2.80f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, postOffset - 0.06f, 2.18f, -0.045f, postOffset + 0.06f, 2.30f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, postOffset - 0.06f, 2.68f, -0.045f, postOffset + 0.06f, 2.80f, 0.055f, COLOR_RAIL, light);
 
 			// Sign backing sheet metal (galvanized steel)
-			drawBox(gh, -halfW + 0.01f, 1.81f, 0.055f, halfW - 0.01f, 2.79f, 0.070f, COLOR_SIGN_BACK, light);
+			drawBox(gh, -halfW + 0.01f, 2.01f, 0.055f, halfW - 0.01f, 2.99f, 0.070f, COLOR_SIGN_BACK, light);
 
 			gh.pop();
 		});
@@ -93,12 +93,14 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 			gh.rotateYDegrees(-facing.asRotation());
 
 			// Front face with green road sign texture (counter-clockwise quad facing +Z / SOUTH towards viewer)
+			// In drawTextureInWorld: V1=(u1, v2), V2=(u2, v2), V3=(u2, v1), V4=(u1, v1)
+			// For right-side up, top vertices V1 and V2 must receive v2=0, and bottom vertices V3 and V4 must receive v1=1.
 			gh.drawTextureInWorld(
-					halfW, 2.80f, 0.071f,
-					-halfW, 2.80f, 0.071f,
-					-halfW, 1.80f, 0.071f,
-					halfW, 1.80f, 0.071f,
-					1f, 0f, 0f, 1f,
+					halfW, 3.00f, 0.071f,
+					-halfW, 3.00f, 0.071f,
+					-halfW, 2.00f, 0.071f,
+					halfW, 2.00f, 0.071f,
+					1f, 1f, 0f, 0f,
 					Direction.SOUTH, 0xFFFFFFFF, light
 			);
 

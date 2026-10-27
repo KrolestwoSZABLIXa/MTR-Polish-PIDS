@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "mtr_polish_pids",
+  "id": "mtr_polish_pack",
   "version": "${version}",
   "name": "MTR Polish Pack",
   "description": "Dodatki polskiej infrastruktury kolejowej i drogowej dla Minecraft Transit Railway (MTR).",
@@ -11,7 +11,7 @@
     "sources": "https://github.com/KrolestwoSZABLIXa/MTR-Polish-PIDS"
   },
   "license": "MIT",
-  "icon": "assets/mtr_polish_pids/icon.png",
+  "icon": "assets/mtr_polish_pack/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [

@@ -50,7 +50,7 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 					final boolean endOfTown = citySignEntity.isEndOfTown();
 					if (!world.isClient()) {
 						world.updateListeners(rootPos, world.getBlockState(rootPos), world.getBlockState(rootPos), 3);
-						player.sendMessage(Text.cast(TextHelper.translatable(endOfTown ? "message.mtr_polish_pids.city_sign_e18a" : "message.mtr_polish_pids.city_sign_e17a", citySignEntity.getCityName())), true);
+						player.sendMessage(Text.cast(TextHelper.translatable(endOfTown ? "message.mtr_polish_pack.city_sign_e18a" : "message.mtr_polish_pack.city_sign_e17a", citySignEntity.getCityName())), true);
 					}
 				} else {
 					if (!world.isClient()) {
@@ -120,13 +120,13 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
 		switch (third) {
 			case UPPER:
-				// Sign board is at upper block (height 0 to 16, centered around z=6 to 10)
-				return IBlock.getVoxelShapeByDirection(0, 0, 6, 16, 16, 10, facing);
+				// Sign board is at upper block (spans dynamically up to 4 blocks wide, centered around x = 8)
+				return IBlock.getVoxelShapeByDirection(-24, 0, 5, 40, 16, 11, facing);
 			case MIDDLE:
 			case LOWER:
 			default:
-				// The two vertical steel mounting posts
-				return IBlock.getVoxelShapeByDirection(2, 0, 7, 14, 16, 9, facing);
+				// Spans across the posts and the center for easy, comfortable selection
+				return IBlock.getVoxelShapeByDirection(-16, 0, 6, 32, 16, 10, facing);
 		}
 	}
 

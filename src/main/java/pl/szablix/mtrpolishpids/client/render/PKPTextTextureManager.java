@@ -34,11 +34,11 @@ public class PKPTextTextureManager {
 
 	static {
 		try {
-			FONT_ROBOTO_MEDIUM = loadFont("/assets/mtr_polish_pids/font/roboto_medium.ttf");
-			FONT_ROBOTO_REGULAR = loadFont("/assets/mtr_polish_pids/font/roboto_regular.ttf");
-			FONT_ROBOTO_ITALIC = loadFont("/assets/mtr_polish_pids/font/roboto_italic.ttf");
-			FONT_MYRIAD_REGULAR = loadFont("/assets/mtr_polish_pids/font/myriad_pro_regular.ttf");
-			FONT_MYRIAD_ITALIC = loadFont("/assets/mtr_polish_pids/font/myriad_pro_italic.ttf");
+			FONT_ROBOTO_MEDIUM = loadFont("/assets/mtr_polish_pack/font/roboto_medium.ttf");
+			FONT_ROBOTO_REGULAR = loadFont("/assets/mtr_polish_pack/font/roboto_regular.ttf");
+			FONT_ROBOTO_ITALIC = loadFont("/assets/mtr_polish_pack/font/roboto_italic.ttf");
+			FONT_MYRIAD_REGULAR = loadFont("/assets/mtr_polish_pack/font/myriad_pro_regular.ttf");
+			FONT_MYRIAD_ITALIC = loadFont("/assets/mtr_polish_pack/font/myriad_pro_italic.ttf");
 		} catch (Exception e) {
 			MTRPolishPIDS.LOGGER.error("Failed to load native TrueType fonts for Java2D PIDS renderer", e);
 			FONT_ROBOTO_MEDIUM = new Font(Font.SANS_SERIF, Font.BOLD, 36);

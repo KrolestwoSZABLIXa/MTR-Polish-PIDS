@@ -17,7 +17,7 @@ import org.mtr.mapping.registry.Registry;
 
 public class MTRPolishPIDS implements ModInitializer {
 
-	public static final String MOD_ID = "mtr_polish_pids";
+	public static final String MOD_ID = "mtr_polish_pack";
 	public static final Logger LOGGER = LogManager.getLogger("MTR Polish Pack");
 	public static final Registry REGISTRY = new Registry();
 
@@ -31,13 +31,13 @@ public class MTRPolishPIDS implements ModInitializer {
 	);
 
 	public static final BlockRegistryObject BLOCK_PKP_PIDS = REGISTRY.registerBlockWithBlockItem(
-			new Identifier(MOD_ID, "pkp_pids_horizontal"),
+			new Identifier(MOD_ID, "pkp_pids_kzl"),
 			() -> new Block(new BlockPKPPIDS()),
 			CREATIVE_TAB
 	);
 
 	public static final BlockEntityTypeRegistryObject<BlockEntityPKPPIDS> BLOCK_ENTITY_TYPE_PKP_PIDS = REGISTRY.registerBlockEntityType(
-			new Identifier(MOD_ID, "pkp_pids_horizontal"),
+			new Identifier(MOD_ID, "pkp_pids_kzl"),
 			BlockEntityPKPPIDS::new,
 			BLOCK_PKP_PIDS::get
 	);

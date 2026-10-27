@@ -1,6 +1,6 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "mtr_polish_pids:item/city_sign"
+		"layer0": "mtr_polish_pack:item/city_sign"
 	}
 }

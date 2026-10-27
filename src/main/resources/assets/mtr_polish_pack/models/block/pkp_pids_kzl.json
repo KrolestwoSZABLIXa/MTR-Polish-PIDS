@@ -1,9 +1,9 @@
 {
 	"textures": {
-		"particle": "mtr_polish_pids:block/pkp_case_navy",
-		"case": "mtr_polish_pids:block/pkp_case_navy",
-		"screen": "mtr_polish_pids:block/pkp_screen_bg",
-		"mount": "mtr_polish_pids:block/pkp_mount"
+		"particle": "mtr_polish_pack:block/pkp_case_navy",
+		"case": "mtr_polish_pack:block/pkp_case_navy",
+		"screen": "mtr_polish_pack:block/pkp_screen_bg",
+		"mount": "mtr_polish_pack:block/pkp_mount"
 	},
 	"elements": [
 		{

@@ -33,7 +33,7 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 						if (!pos.equals(newBlockPos)) {
 							world.updateListeners(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
 						}
-						player.sendMessage(Text.cast(TextHelper.translatable(right ? "message.mtr_polish_pids.clock_right" : "message.mtr_polish_pids.clock_left")), true);
+						player.sendMessage(Text.cast(TextHelper.translatable(right ? "message.mtr_polish_pack.clock_right" : "message.mtr_polish_pack.clock_left")), true);
 					}
 				} else {
 					if (!world.isClient()) {

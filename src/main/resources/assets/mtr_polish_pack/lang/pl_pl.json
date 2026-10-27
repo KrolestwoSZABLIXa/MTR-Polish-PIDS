@@ -1,0 +1,18 @@
+{
+	"itemGroup.mtr_polish_pack.creative_tab": "MTR Polish Pack",
+	"block.mtr_polish_pack.pkp_pids_kzl": "Tablica krawędziowa PKP - KZŁ",
+	"item.mtr_polish_pack.pkp_pids_kzl": "Tablica krawędziowa PKP - KZŁ",
+	"block.mtr_polish_pack.city_sign": "Tablica miejscowości (E-17a / E-18a)",
+	"item.mtr_polish_pack.city_sign": "Tablica miejscowości (E-17a / E-18a)",
+	"message.mtr_polish_pack.clock_right": "\u00a7b[PKP PIDS]\u00a7r Pozycja zegara: \u00a7ePo prawej stronie\u00a7r (skierowany w stron\u0119 toru)",
+	"message.mtr_polish_pack.clock_left": "\u00a7b[PKP PIDS]\u00a7r Pozycja zegara: \u00a7ePo lewej stronie\u00a7r (skierowany w stron\u0119 toru)",
+	"message.mtr_polish_pack.city_sign_e17a": "\u00a7b[MTR Polish Pack]\u00a7r Ustawiono: \u00a7aZnak E-17a (Początek miejscowości)\u00a7r: %s",
+	"message.mtr_polish_pack.city_sign_e18a": "\u00a7b[MTR Polish Pack]\u00a7r Ustawiono: \u00a7cZnak E-18a (Koniec miejscowości)\u00a7r: %s",
+	"gui.mtr_polish_pack.clock_side": "Strona zegara:",
+	"gui.mtr_polish_pack.clock_right": "Prawa",
+	"gui.mtr_polish_pack.clock_left": "Lewa",
+	"gui.mtr_polish_pack.city_sign_title": "Ustawienia tablicy miejscowości",
+	"gui.mtr_polish_pack.city_name": "Nazwa miejscowości:",
+	"gui.mtr_polish_pack.end_of_town": "Koniec miejscowości (Znak E-18a)",
+	"gui.mtr_polish_pack.save": "Zapisz"
+}

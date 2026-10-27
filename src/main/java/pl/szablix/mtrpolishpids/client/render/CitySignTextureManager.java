@@ -24,7 +24,7 @@ public class CitySignTextureManager {
 	private static Font FONT_DROGOWSKAZ;
 
 	static {
-		try (InputStream is = CitySignTextureManager.class.getResourceAsStream("/assets/mtr_polish_pids/font/drogowskaz.ttf")) {
+		try (InputStream is = CitySignTextureManager.class.getResourceAsStream("/assets/mtr_polish_pack/font/drogowskaz.ttf")) {
 			if (is != null) {
 				FONT_DROGOWSKAZ = Font.createFont(Font.TRUETYPE_FONT, is);
 			} else {
