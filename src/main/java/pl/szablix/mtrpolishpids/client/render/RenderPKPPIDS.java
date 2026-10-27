@@ -171,13 +171,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Layer 1: Blue arrival badge: w = 23.5, h = 4.35 (vertically centered with clock at Y = 5.0)
-		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
-		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
-
-		// Layer 2: White badge box & Red accent line (only rendered when has arrival)
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final boolean hideArrival = entity.getHideArrival(0);
 		final boolean hasArrival = arrival != null && !hideArrival;
@@ -185,17 +178,38 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				? (arrival.getDeviation() + 30000) / 60000
 				: 0;
 
-		if (hasArrival) {
-			graphicsHolder.push();
-			graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-			// Layer 2a: White box under departure time for train line/number badge
-			IDrawing.drawTexture(graphicsHolder, displayX, 5.52f, 0, displayX + 5.125f, 6.47f, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-			// Layer 2b: Red accent line (only rendered when delayed)
-			if (delayMinutes > 0) {
-				IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
-			}
-			graphicsHolder.pop();
+		graphicsHolder.push();
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
+
+		if (!hasArrival) {
+			// No active train: Solid blue screen across the entire display area
+			IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+		} else {
+			final float badgeW = 5.125f;
+			final float midY1 = 5.52f;
+			final float midY2 = 6.47f;
+			final float botY1 = 6.55f;
+			final float botY2 = 7.20f;
+
+			// 1. Top Section (Navy): Under departure time & destination station
+			IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, midY1, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+
+			// 2. Middle Section Left (White): Authentic white badge under departure time
+			// Non-overlapping with blue! Impossible to Z-fight or disappear under angles!
+			IDrawing.drawTexture(graphicsHolder, displayX, midY1, 0, displayX + badgeW, midY2, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+
+			// 3. Middle Section Right (Navy): Under "Przez / Via" & intermediate stops
+			IDrawing.drawTexture(graphicsHolder, displayX + badgeW, midY1, 0, displayX + boxWidth, midY2, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+
+			// 4. Spacer row (Navy): Gap between middle section and bottom accent
+			IDrawing.drawTexture(graphicsHolder, displayX, midY2, 0, displayX + boxWidth, botY1, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
+
+			// 5. Bottom accent row: Red if delayed, Navy if on time
+			final int bottomColor = delayMinutes > 0 ? COLOR_RED_LINE : COLOR_BADGE_BG;
+			IDrawing.drawTexture(graphicsHolder, displayX, botY1, 0, displayX + boxWidth, botY2, 0, Direction.SOUTH, bottomColor, GraphicsHolder.getDefaultLight());
 		}
+
+		graphicsHolder.pop();
 
 		graphicsHolder.pop();
 	}
@@ -332,7 +346,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 			graphicsHolder.rotateZDegrees(180);
-			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
+			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
 			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
