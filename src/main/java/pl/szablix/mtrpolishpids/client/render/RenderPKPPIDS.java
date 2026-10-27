@@ -81,19 +81,19 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT_2 layer (self-illuminated, crisp colors, no shader bloom)
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
-			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
-			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
-			}
-		});
-
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT_2 layer (self-illuminated crisp dial, matches text brightness)
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
+		// 1. Clock Face on TEXTURE_CLOCK_FACE in LIGHT_TRANSLUCENT layer (drawn first as clock background)
+		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
+			}
+		});
+
+		// 2. Quads (Navy screen, line box, clock hands) on TEXTURE_WHITE in LIGHT_TRANSLUCENT layer (self-illuminated, clock hands on top of dial)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
+			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
+			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
+				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
 			}
 		});
 
@@ -298,7 +298,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_2, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());

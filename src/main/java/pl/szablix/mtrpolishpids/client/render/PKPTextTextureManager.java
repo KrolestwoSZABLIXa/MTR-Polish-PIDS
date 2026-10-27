@@ -234,7 +234,7 @@ public class PKPTextTextureManager {
 			for (int x = 0; x < width; x++) {
 				final int argb = img.getRGB(x, y);
 				final int a = (argb >> 24) & 0xFF;
-				if (a == 0) {
+				if (a < 36) {
 					nativeImage.setColor(x, y, 0);
 					continue;
 				}
