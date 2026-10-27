@@ -177,7 +177,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		IDrawing.drawTexture(graphicsHolder, displayX, 2.85f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
 		graphicsHolder.pop();
 
-		// Layer 2: Red accent line (only rendered when delayed)
+		// Layer 2: White badge box & Red accent line (only rendered when has arrival)
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final boolean hideArrival = entity.getHideArrival(0);
 		final boolean hasArrival = arrival != null && !hideArrival;
@@ -185,10 +185,15 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				? (arrival.getDeviation() + 30000) / 60000
 				: 0;
 
-		if (hasArrival && delayMinutes > 0) {
+		if (hasArrival) {
 			graphicsHolder.push();
 			graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-			IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+			// Layer 2a: White box under departure time for train line/number badge
+			IDrawing.drawTexture(graphicsHolder, displayX, 5.52f, 0, displayX + 5.125f, 6.47f, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+			// Layer 2b: Red accent line (only rendered when delayed)
+			if (delayMinutes > 0) {
+				IDrawing.drawTexture(graphicsHolder, displayX, 6.55f, 0, displayX + boxWidth, 7.20f, 0, Direction.SOUTH, COLOR_RED_LINE, GraphicsHolder.getDefaultLight());
+			}
 			graphicsHolder.pop();
 		}
 
@@ -252,13 +257,14 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
 			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.65f, 2.35f, 5.125f, HorizontalAlignment.CENTER);
 
-			// Train Line / Route Number on integrated white badge (black text)
+			// Train Line / Route Number on white badge (black text, scrolls smoothly if long)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
 			if (!lineName.isEmpty()) {
-				final PKPTextTextureManager.DynamicTextTexture badgeTex = PKPTextTextureManager.getTrainBadge(lineName);
-				final float badgeMaxW = 5.125f;
-				final float badgeTargetH = 0.90f;
-				renderStaticTexture(entity, blockPos, facing, isBackSide, badgeTex, displayX, 5.55f, badgeTargetH, badgeMaxW, HorizontalAlignment.CENTER);
+				final PKPTextTextureManager.DynamicTextTexture lineTex = PKPTextTextureManager.getText("badge", lineName.trim(), PKPTextTextureManager.getRobotoMedium(), 46f, Color.BLACK);
+				final float badgeW = 5.125f;
+				final float badgeH = 0.92f;
+				final float badgeY = 5.53f;
+				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, lineTex, displayX + 0.2f, badgeY, badgeH, badgeW - 0.4f, HorizontalAlignment.CENTER);
 			}
 
 			// Destination Station
@@ -326,7 +332,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 			graphicsHolder.rotateZDegrees(180);
-			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
+			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
 			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
