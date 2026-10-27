@@ -165,6 +165,56 @@ public class PKPTextTextureManager {
 	}
 
 	/**
+	 * Renders train category / line badge with an integrated solid white background and bold black text.
+	 * Drawing the white background directly on the badge texture guarantees it can NEVER disappear
+	 * or separate from the text at glancing viewing angles.
+	 */
+	public static DynamicTextTexture getTrainBadge(String lineName) {
+		final String safeText = lineName == null ? "" : lineName.trim();
+		final String key = "badge_v6_" + safeText;
+		final DynamicTextTexture existing = CACHE.get(key);
+		if (existing != null) {
+			existing.touch();
+			return existing;
+		}
+
+		final float fontSize = 46f;
+		final Font font = FONT_ROBOTO_MEDIUM.deriveFont(Font.PLAIN, fontSize);
+
+		final BufferedImage probe = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D gProbe = probe.createGraphics();
+		gProbe.setFont(font);
+		final FontMetrics fm = gProbe.getFontMetrics();
+		final int textWidth = fm.stringWidth(safeText);
+		final int textAscent = fm.getAscent();
+		final int textDescent = fm.getDescent();
+		gProbe.dispose();
+
+		final int padX = 14;
+		final int padY = 6;
+		final int badgeH = textAscent + textDescent + padY * 2;
+		final int badgeW = Math.max(badgeH * 2, textWidth + padX * 2);
+
+		final BufferedImage img = new BufferedImage(badgeW, badgeH, BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D g = img.createGraphics();
+		setupQualityHints(g);
+
+		// Solid white badge background
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, badgeW, badgeH);
+
+		// Bold black line/category text centered
+		g.setColor(Color.BLACK);
+		g.setFont(font);
+		final int textX = (badgeW - textWidth) / 2;
+		final int baseline = padY + textAscent;
+		g.drawString(safeText, textX, baseline);
+		g.dispose();
+
+		return registerTexture(key, img, badgeW, badgeH);
+	}
+
+	/**
 	 * Renders text in a single font (e.g. Departure Time, Destination, Badge, Intermediate Stops, Delay).
 	 */
 	public static DynamicTextTexture getText(String keyPrefix, String text, Font font, float fontSize, Color color) {
