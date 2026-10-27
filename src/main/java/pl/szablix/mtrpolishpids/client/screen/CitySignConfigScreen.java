@@ -42,13 +42,13 @@ public class CitySignConfigScreen extends ScreenExtension {
 		this.cityNameBack = (cityNameBack == null || cityNameBack.trim().isEmpty()) ? this.cityName : cityNameBack.trim();
 		this.endOfTownBack = endOfTownBack;
 
-		textFieldCityName = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, "Warszawa");
+		textFieldCityName = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, null);
 		checkboxEndOfTown = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), endOfTown, checked -> this.endOfTown = checked);
 		checkboxTwoSided = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), twoSided, checked -> {
 			this.twoSided = checked;
 			updatePositions();
 		});
-		textFieldCityNameBack = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, "Warszawa");
+		textFieldCityNameBack = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, null);
 		checkboxEndOfTownBack = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), endOfTownBack, checked -> this.endOfTownBack = checked);
 
 		buttonSave = new ButtonWidgetExtension(0, 0, 0, 20, TextHelper.translatable("gui.mtr_polish_pack.save"), button -> {
@@ -93,25 +93,29 @@ public class CitySignConfigScreen extends ScreenExtension {
 			endOfTownBack = citySignEntity.isEndOfTownBack();
 		}
 
-		textFieldCityName.setText2(cityName);
 		addChild(new ClickableWidget(textFieldCityName));
-
-		checkboxEndOfTown.setChecked(endOfTown);
 		addChild(new ClickableWidget(checkboxEndOfTown));
-
-		checkboxTwoSided.setChecked(twoSided);
 		addChild(new ClickableWidget(checkboxTwoSided));
-
-		textFieldCityNameBack.setText2(cityNameBack);
 		addChild(new ClickableWidget(textFieldCityNameBack));
-
-		checkboxEndOfTownBack.setChecked(endOfTownBack);
 		addChild(new ClickableWidget(checkboxEndOfTownBack));
-
 		addChild(new ClickableWidget(buttonSave));
 		addChild(new ClickableWidget(buttonCancel));
 
+		checkboxEndOfTown.setChecked(endOfTown);
+		checkboxTwoSided.setChecked(twoSided);
+		checkboxEndOfTownBack.setChecked(endOfTownBack);
+
 		updatePositions();
+
+		textFieldCityName.setEditableColor2(0xFFFFFFFF);
+		textFieldCityName.setText2(cityName);
+		textFieldCityName.setSelectionStart2(0);
+		textFieldCityName.setSelectionEnd2(0);
+
+		textFieldCityNameBack.setEditableColor2(0xFFFFFFFF);
+		textFieldCityNameBack.setText2(cityNameBack);
+		textFieldCityNameBack.setSelectionStart2(0);
+		textFieldCityNameBack.setSelectionEnd2(0);
 	}
 
 	private void updatePositions() {

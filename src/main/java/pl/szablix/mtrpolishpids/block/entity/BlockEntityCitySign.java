@@ -98,7 +98,7 @@ public class BlockEntityCitySign extends BlockEntityExtension {
 		final float halfWFront = estimateHalfWidth(cityName);
 		final float halfWBack = twoSided ? estimateHalfWidth(cityNameBack) : halfWFront;
 		final float maxHalfW = Math.max(halfWFront, halfWBack);
-		return Math.min(0.42f, Math.max(0.28f, maxHalfW * 0.45f));
+		return Math.max(0.38f, maxHalfW * 0.65f);
 	}
 
 	public float getHalfWidth() {

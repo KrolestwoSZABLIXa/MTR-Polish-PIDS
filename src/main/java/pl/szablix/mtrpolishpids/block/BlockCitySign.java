@@ -154,7 +154,7 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 				break;
 		}
 
-		float postOffset = 0.42f;
+		float postOffset = 0.65f;
 		float halfW = 1.2f;
 		final BlockEntity entity = world.getBlockEntity(rootPos);
 		if (entity != null && entity.data instanceof BlockEntityCitySign) {
