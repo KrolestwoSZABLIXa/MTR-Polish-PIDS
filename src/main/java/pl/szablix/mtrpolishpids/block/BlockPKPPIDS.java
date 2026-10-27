@@ -53,16 +53,6 @@ public class BlockPKPPIDS extends BlockPIDSHorizontalBase {
 		return VoxelShapes.union(casing, pole);
 	}
 
-	@Override
-	public void onBreak2(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-		final BlockPos otherPos = pos.offset(facing);
-		if (!world.isClient() && player != null && player.isCreative()) {
-			IBlock.onBreakCreative(world, player, pos);
-			IBlock.onBreakCreative(world, player, otherPos);
-		}
-		super.onBreak2(world, pos, state, player);
-	}
 
 	@Override
 	public BlockEntityExtension createBlockEntity(BlockPos blockPos, BlockState blockState) {

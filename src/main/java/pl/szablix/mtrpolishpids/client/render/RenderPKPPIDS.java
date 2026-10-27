@@ -45,7 +45,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final float LAYER_OFFSET = 0.0004f;
 
 	// Colors directly from authentic PKP PLK CSDIP specifications (RAL 5002 Ultramarine Blue)
-	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
 	private static final int COLOR_BADGE_BG = 0xFF002478;   // Authentic PKP PLK RAL 5002 deep display blue (no neon bloom)
 	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
 	private static final int COLOR_WHITE = 0xFFD0D8E8;      // Balanced LCD white: eliminates blinding shader flare/bloom while staying crisp
@@ -122,11 +121,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// Layer 0: Screen background (confined to 1.25f - 30.75f to preserve the navy blue side casing rims)
-		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 0);
-		IDrawing.drawTexture(graphicsHolder, 1.25f, 0.75f, 0, 30.75f, 8.375f, 0, Direction.SOUTH, COLOR_SCREEN_BG, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
 
 		// Layer 1: Blue arrival badge: w = 23.5, h = 4.35 (vertically centered with clock at Y = 5.0)
 		graphicsHolder.push();

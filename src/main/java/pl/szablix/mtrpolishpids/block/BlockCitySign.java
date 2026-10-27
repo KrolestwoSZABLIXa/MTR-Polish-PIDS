@@ -109,24 +109,11 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 	@Override
 	public void onBreak2(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
-		final BlockPos rootPos;
-		switch (third) {
-			case UPPER:
-				rootPos = pos.down(2);
-				break;
-			case MIDDLE:
-				rootPos = pos.down();
-				break;
-			case LOWER:
-			default:
-				rootPos = pos;
-				break;
-		}
-
 		if (!world.isClient() && player != null && player.isCreative()) {
-			IBlock.onBreakCreative(world, player, rootPos);
-			IBlock.onBreakCreative(world, player, rootPos.up());
-			IBlock.onBreakCreative(world, player, rootPos.up(2));
+			if (third != IBlock.EnumThird.LOWER) {
+				final BlockPos rootPos = third == IBlock.EnumThird.UPPER ? pos.down(2) : pos.down();
+				IBlock.onBreakCreative(world, player, rootPos);
+			}
 		}
 		super.onBreak2(world, pos, state, player);
 	}
