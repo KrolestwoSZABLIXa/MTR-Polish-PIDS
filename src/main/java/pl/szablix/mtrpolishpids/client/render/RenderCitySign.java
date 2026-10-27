@@ -65,7 +65,7 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 		final float halfWFront = texFront.worldWidth / 2.0f;
 		final float halfWBack = (texBack != null) ? texBack.worldWidth / 2.0f : halfWFront;
 		final float maxHalfW = Math.max(halfWFront, twoSided ? halfWBack : halfWFront);
-		final float postOffset = Math.max(0.35f, maxHalfW * 0.65f);
+		final float postOffset = Math.min(0.42f, Math.max(0.28f, maxHalfW * 0.45f));
 		final float postR = 0.04f; // 8 cm wide steel posts
 
 		// 1. Render steel posts, mounting channels, and sign backing sheet in EXTERIOR layer
@@ -80,9 +80,9 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 			// Right post (from ground y=0 to y=3.00)
 			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 3.00f, postR, light);
 
-			// Horizontal aluminum mounting channels behind front board
-			final float railLeftFront = -postOffset - 0.20f;
-			final float railRightFront = postOffset + 0.20f;
+			// Horizontal aluminum mounting channels behind front board (spanning across board width)
+			final float railLeftFront = -maxHalfW + 0.10f;
+			final float railRightFront = maxHalfW - 0.10f;
 			drawBox(gh, railLeftFront, 2.30f, 0.040f, railRightFront, 2.38f, 0.055f, COLOR_RAIL, light);
 			drawBox(gh, railLeftFront, 2.70f, 0.040f, railRightFront, 2.78f, 0.055f, COLOR_RAIL, light);
 
@@ -97,8 +97,8 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 
 			// Optional back sign mounting structure & backing sheet
 			if (twoSided) {
-				final float railLeftBack = -postOffset - 0.20f;
-				final float railRightBack = postOffset + 0.20f;
+				final float railLeftBack = -maxHalfW + 0.10f;
+				final float railRightBack = maxHalfW - 0.10f;
 				drawBox(gh, railLeftBack, 2.30f, -0.055f, railRightBack, 2.38f, -0.040f, COLOR_RAIL, light);
 				drawBox(gh, railLeftBack, 2.70f, -0.055f, railRightBack, 2.78f, -0.040f, COLOR_RAIL, light);
 

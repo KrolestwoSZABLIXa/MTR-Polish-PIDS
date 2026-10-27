@@ -43,13 +43,13 @@ public class CitySignConfigScreen extends ScreenExtension {
 		this.endOfTownBack = endOfTownBack;
 
 		textFieldCityName = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, "Warszawa");
-		checkboxEndOfTown = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.translatable("gui.mtr_polish_pack.end_of_town_front"), endOfTown, checked -> this.endOfTown = checked);
-		checkboxTwoSided = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.translatable("gui.mtr_polish_pack.two_sided"), twoSided, checked -> {
+		checkboxEndOfTown = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), endOfTown, checked -> this.endOfTown = checked);
+		checkboxTwoSided = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), twoSided, checked -> {
 			this.twoSided = checked;
-			updateVisibility();
+			updatePositions();
 		});
 		textFieldCityNameBack = new TextFieldWidgetExtension(0, 0, 0, 20, 60, TextCase.DEFAULT, null, "Warszawa");
-		checkboxEndOfTownBack = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.translatable("gui.mtr_polish_pack.end_of_town_back"), endOfTownBack, checked -> this.endOfTownBack = checked);
+		checkboxEndOfTownBack = new CheckboxWidgetExtension(0, 0, 0, 20, TextHelper.literal(""), endOfTownBack, checked -> this.endOfTownBack = checked);
 
 		buttonSave = new ButtonWidgetExtension(0, 0, 0, 20, TextHelper.translatable("gui.mtr_polish_pack.save"), button -> {
 			String updatedName = textFieldCityName.getText2().trim();
@@ -93,46 +93,53 @@ public class CitySignConfigScreen extends ScreenExtension {
 			endOfTownBack = citySignEntity.isEndOfTownBack();
 		}
 
-		final int centerX = width / 2;
-		final int centerY = height / 2;
-
-		// Front section
-		IDrawing.setPositionAndWidth(textFieldCityName, centerX - 100, centerY - 65, 200);
 		textFieldCityName.setText2(cityName);
 		addChild(new ClickableWidget(textFieldCityName));
 
-		IDrawing.setPositionAndWidth(checkboxEndOfTown, centerX - 100, centerY - 40, 20);
 		checkboxEndOfTown.setChecked(endOfTown);
 		addChild(new ClickableWidget(checkboxEndOfTown));
 
-		// Two sided checkbox
-		IDrawing.setPositionAndWidth(checkboxTwoSided, centerX - 100, centerY - 15, 20);
 		checkboxTwoSided.setChecked(twoSided);
 		addChild(new ClickableWidget(checkboxTwoSided));
 
-		// Back section
-		IDrawing.setPositionAndWidth(textFieldCityNameBack, centerX - 100, centerY + 10, 200);
 		textFieldCityNameBack.setText2(cityNameBack);
 		addChild(new ClickableWidget(textFieldCityNameBack));
 
-		IDrawing.setPositionAndWidth(checkboxEndOfTownBack, centerX - 100, centerY + 35, 20);
 		checkboxEndOfTownBack.setChecked(endOfTownBack);
 		addChild(new ClickableWidget(checkboxEndOfTownBack));
 
-		// Save & Cancel buttons
-		IDrawing.setPositionAndWidth(buttonSave, centerX - 100, centerY + 65, 95);
 		addChild(new ClickableWidget(buttonSave));
-
-		IDrawing.setPositionAndWidth(buttonCancel, centerX + 5, centerY + 65, 95);
 		addChild(new ClickableWidget(buttonCancel));
 
-		updateVisibility();
+		updatePositions();
 	}
 
-	private void updateVisibility() {
+	private void updatePositions() {
 		final boolean isTwoSided = checkboxTwoSided.isChecked2();
-		textFieldCityNameBack.setVisibleMapped(isTwoSided);
-		checkboxEndOfTownBack.setVisibleMapped(isTwoSided);
+		final int centerX = width / 2;
+		final int centerY = height / 2;
+
+		if (isTwoSided) {
+			IDrawing.setPositionAndWidth(textFieldCityName, centerX - 100, centerY - 76, 200);
+			IDrawing.setPositionAndWidth(checkboxEndOfTown, centerX - 100, centerY - 50, 20);
+			IDrawing.setPositionAndWidth(checkboxTwoSided, centerX - 100, centerY - 26, 20);
+			IDrawing.setPositionAndWidth(textFieldCityNameBack, centerX - 100, centerY + 10, 200);
+			IDrawing.setPositionAndWidth(checkboxEndOfTownBack, centerX - 100, centerY + 36, 20);
+			IDrawing.setPositionAndWidth(buttonSave, centerX - 100, centerY + 68, 95);
+			IDrawing.setPositionAndWidth(buttonCancel, centerX + 5, centerY + 68, 95);
+
+			textFieldCityNameBack.setVisibleMapped(true);
+			checkboxEndOfTownBack.setVisibleMapped(true);
+		} else {
+			IDrawing.setPositionAndWidth(textFieldCityName, centerX - 100, centerY - 45, 200);
+			IDrawing.setPositionAndWidth(checkboxEndOfTown, centerX - 100, centerY - 18, 20);
+			IDrawing.setPositionAndWidth(checkboxTwoSided, centerX - 100, centerY + 8, 20);
+			IDrawing.setPositionAndWidth(buttonSave, centerX - 100, centerY + 42, 95);
+			IDrawing.setPositionAndWidth(buttonCancel, centerX + 5, centerY + 42, 95);
+
+			textFieldCityNameBack.setVisibleMapped(false);
+			checkboxEndOfTownBack.setVisibleMapped(false);
+		}
 	}
 
 	@Override
@@ -148,20 +155,20 @@ public class CitySignConfigScreen extends ScreenExtension {
 
 		final int centerX = width / 2;
 		final int centerY = height / 2;
+		final boolean isTwoSided = checkboxTwoSided.isChecked2();
 
-		graphicsHolder.drawCenteredText(TextHelper.translatable("gui.mtr_polish_pack.city_sign_title"), centerX, centerY - 95, -1);
-
-		// Front labels (always drawn explicitly!)
-		graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.city_name_front"), centerX - 100, centerY - 76, 0xFFA0A0A0, false, GraphicsHolder.getDefaultLight());
-		graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.end_of_town_front"), centerX - 75, centerY - 34, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
-
-		// Two sided label
-		graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.two_sided"), centerX - 75, centerY - 9, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
-
-		// Back labels (if two sided)
-		if (checkboxTwoSided.isChecked2()) {
-			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.city_name_back"), centerX - 100, centerY + 0, 0xFFA0A0A0, false, GraphicsHolder.getDefaultLight());
-			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.end_of_town_back"), centerX - 75, centerY + 41, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
+		if (isTwoSided) {
+			graphicsHolder.drawCenteredText(TextHelper.translatable("gui.mtr_polish_pack.city_sign_title"), centerX, centerY - 106, -1);
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.city_name_front"), centerX - 100, centerY - 88, 0xFFA0A0A0, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.end_of_town_front"), centerX - 75, centerY - 44, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.two_sided"), centerX - 75, centerY - 20, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.city_name_back"), centerX - 100, centerY - 2, 0xFFA0A0A0, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.end_of_town_back"), centerX - 75, centerY + 42, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
+		} else {
+			graphicsHolder.drawCenteredText(TextHelper.translatable("gui.mtr_polish_pack.city_sign_title"), centerX, centerY - 72, -1);
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.city_name_front"), centerX - 100, centerY - 57, 0xFFA0A0A0, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.end_of_town_front"), centerX - 75, centerY - 12, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
+			graphicsHolder.drawText(TextHelper.translatable("gui.mtr_polish_pack.two_sided"), centerX - 75, centerY + 14, 0xFFFFFFFF, false, GraphicsHolder.getDefaultLight());
 		}
 
 		super.render(graphicsHolder, mouseX, mouseY, tickDelta);

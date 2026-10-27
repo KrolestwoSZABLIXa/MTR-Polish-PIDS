@@ -139,35 +139,49 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 	public VoxelShape getOutlineShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
 		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
+
+		final BlockPos rootPos;
 		switch (third) {
 			case UPPER:
-				// Sign board is at upper block (spans dynamically, centered around x = 8)
-				return IBlock.getVoxelShapeByDirection(-20, 2, 4, 36, 16, 12, facing);
+				rootPos = pos.down(2);
+				break;
+			case MIDDLE:
+				rootPos = pos.down();
+				break;
+			case LOWER:
+			default:
+				rootPos = pos;
+				break;
+		}
+
+		float postOffset = 0.42f;
+		float halfW = 1.2f;
+		final BlockEntity entity = world.getBlockEntity(rootPos);
+		if (entity != null && entity.data instanceof BlockEntityCitySign) {
+			final BlockEntityCitySign citySignEntity = (BlockEntityCitySign) entity.data;
+			postOffset = citySignEntity.getPostOffset();
+			halfW = citySignEntity.getHalfWidth();
+		}
+
+		switch (third) {
+			case UPPER:
+				// Sign board dynamically scales with text width (centered at x = 8)
+				final double halfWPx = Math.max(16.0, halfW * 16.0);
+				return IBlock.getVoxelShapeByDirection(8.0 - halfWPx, 2, 4, 8.0 + halfWPx, 16, 12, facing);
 			case MIDDLE:
 			case LOWER:
 			default:
-				// Two posts (no collision or solid outline in the middle to allow walking through!)
-				final VoxelShape post1 = IBlock.getVoxelShapeByDirection(-4, 0, 6, 0, 16, 10, facing);
-				final VoxelShape post2 = IBlock.getVoxelShapeByDirection(16, 0, 6, 20, 16, 10, facing);
+				// Two solid posts matched dynamically to postOffset (never ghosts, open passage in middle)
+				final double offsetPx = postOffset * 16.0;
+				final VoxelShape post1 = IBlock.getVoxelShapeByDirection(8.0 - offsetPx - 0.8, 0, 6, 8.0 - offsetPx + 0.8, 16, 10, facing);
+				final VoxelShape post2 = IBlock.getVoxelShapeByDirection(8.0 + offsetPx - 0.8, 0, 6, 8.0 + offsetPx + 0.8, 16, 10, facing);
 				return VoxelShapes.union(post1, post2);
 		}
 	}
 
 	@Override
 	public VoxelShape getCollisionShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
-		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
-		switch (third) {
-			case UPPER:
-				return IBlock.getVoxelShapeByDirection(-20, 2, 4, 36, 16, 12, facing);
-			case MIDDLE:
-			case LOWER:
-			default:
-				// Players can freely walk between the two posts under the sign
-				final VoxelShape post1 = IBlock.getVoxelShapeByDirection(-4, 0, 6, 0, 16, 10, facing);
-				final VoxelShape post2 = IBlock.getVoxelShapeByDirection(16, 0, 6, 20, 16, 10, facing);
-				return VoxelShapes.union(post1, post2);
-		}
+		return getOutlineShape2(state, world, pos, context);
 	}
 
 	@Override
