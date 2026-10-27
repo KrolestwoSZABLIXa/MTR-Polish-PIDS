@@ -81,16 +81,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in EXTERIOR layer (no beacon beam bloom on shaders)
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer (luminous self-illuminated screen)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in EXTERIOR layer
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer (luminous clock)
+		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
@@ -300,7 +300,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR_TRANSLUCENT, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
