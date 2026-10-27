@@ -1,3 +1,6 @@
 {
-	"parent": "mtr_polish_pack:block/pkp_pids_kzl"
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "mtr_polish_pack:item/pkp_pids_kzl"
+	}
 }

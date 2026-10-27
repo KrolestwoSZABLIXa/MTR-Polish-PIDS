@@ -32,7 +32,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final float START_X = 0f;
 	private static final float START_Y = 11.0f;
-	private static final float START_Z = 6f;
+	private static final float START_Z = 5.64f;
 	private static final boolean ROTATE_90 = true;
 	private static final float SCALE = 16f;
 
@@ -41,8 +41,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	private static final float SCROLL_SPEED = 2.2f;
 
-	// Ultra-flush layer offset to prevent z-fighting while appearing fully glued to the glass surface
-	private static final float LAYER_OFFSET = 0.0001f;
+	// Distinct layer offset (0.0025 blocks = 2.5 mm per layer) to prevent z-fighting at distance
+	private static final float LAYER_OFFSET = 0.0025f;
 
 	// Colors directly from authentic PKP PLK CSDIP specifications
 	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
@@ -81,16 +81,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
+		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in EXTERIOR layer (no beacon beam bloom on shaders)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
+		// 2. Clock Face on TEXTURE_CLOCK_FACE in EXTERIOR layer
+		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
@@ -300,7 +300,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.LIGHT_TRANSLUCENT, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR_TRANSLUCENT, (graphicsHolder, offset) -> {
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
