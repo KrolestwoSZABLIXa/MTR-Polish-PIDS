@@ -7,6 +7,27 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "mtr_polish_pack:pkp_pids_kzl",
+                  "properties": {
+                    "facing": "north"
+                  }
+                },
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "mtr_polish_pack:pkp_pids_kzl",
+                  "properties": {
+                    "facing": "east"
+                  }
+                }
+              ]
+            }
+          ],
           "name": "mtr_polish_pack:pkp_pids_kzl"
         }
       ],

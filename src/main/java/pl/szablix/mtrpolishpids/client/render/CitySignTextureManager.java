@@ -128,8 +128,8 @@ public class CitySignTextureManager {
 
 		g.dispose();
 
-		// 7. Dynamic width in Minecraft world blocks: 256px height = 1.0 block height
-		final float worldWidth = (width / 256.0f) * 1.0f;
+		// 7. Dynamic width in Minecraft world blocks: 256px height = 0.80 block height (sleeker, realistic proportions)
+		final float worldWidth = (width / 256.0f) * 0.80f;
 
 		return registerTexture(cacheKey, img, width, height, worldWidth);
 	}

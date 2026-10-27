@@ -15,7 +15,7 @@ public final class PKPClientPacketHelper {
 		MinecraftClient.getInstance().openScreen(new Screen(new PKPPIDSConfigScreen(blockPos, maxArrivals, clockOnRight)));
 	}
 
-	public static void openCitySignConfigScreen(BlockPos blockPos, String cityName, boolean endOfTown) {
-		MinecraftClient.getInstance().openScreen(new Screen(new CitySignConfigScreen(blockPos, cityName, endOfTown)));
+	public static void openCitySignConfigScreen(BlockPos blockPos, String cityName, boolean endOfTown, boolean twoSided, String cityNameBack, boolean endOfTownBack) {
+		MinecraftClient.getInstance().openScreen(new Screen(new CitySignConfigScreen(blockPos, cityName, endOfTown, twoSided, cityNameBack, endOfTownBack)));
 	}
 }

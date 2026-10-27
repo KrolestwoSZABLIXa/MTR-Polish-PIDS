@@ -55,7 +55,14 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 				} else {
 					if (!world.isClient()) {
 						citySignEntity.markDirty2();
-						MTRPolishPIDS.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new PacketOpenCitySignConfigScreen(rootPos, citySignEntity.getCityName(), citySignEntity.isEndOfTown()));
+						MTRPolishPIDS.REGISTRY.sendPacketToClient(ServerPlayerEntity.cast(player), new PacketOpenCitySignConfigScreen(
+								rootPos,
+								citySignEntity.getCityName(),
+								citySignEntity.isEndOfTown(),
+								citySignEntity.isTwoSided(),
+								citySignEntity.getCityNameBack(),
+								citySignEntity.isEndOfTownBack()
+						));
 					}
 				}
 			}
@@ -100,10 +107,24 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 	@Override
 	public void onBreak2(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
-		if (third == IBlock.EnumThird.MIDDLE) {
-			IBlock.onBreakCreative(world, player, pos.down());
-		} else if (third == IBlock.EnumThird.UPPER) {
-			IBlock.onBreakCreative(world, player, pos.down(2));
+		final BlockPos rootPos;
+		switch (third) {
+			case UPPER:
+				rootPos = pos.down(2);
+				break;
+			case MIDDLE:
+				rootPos = pos.down();
+				break;
+			case LOWER:
+			default:
+				rootPos = pos;
+				break;
+		}
+
+		if (!world.isClient() && player != null && player.isCreative()) {
+			IBlock.onBreakCreative(world, player, rootPos);
+			IBlock.onBreakCreative(world, player, rootPos.up());
+			IBlock.onBreakCreative(world, player, rootPos.up(2));
 		}
 		super.onBreak2(world, pos, state, player);
 	}
@@ -120,13 +141,32 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
 		switch (third) {
 			case UPPER:
-				// Sign board is at upper block (spans dynamically up to 4 blocks wide, centered around x = 8)
-				return IBlock.getVoxelShapeByDirection(-24, 0, 5, 40, 16, 11, facing);
+				// Sign board is at upper block (spans dynamically, centered around x = 8)
+				return IBlock.getVoxelShapeByDirection(-20, 2, 4, 36, 16, 12, facing);
 			case MIDDLE:
 			case LOWER:
 			default:
-				// Spans across the posts and the center for easy, comfortable selection
-				return IBlock.getVoxelShapeByDirection(-16, 0, 6, 32, 16, 10, facing);
+				// Two posts (no collision or solid outline in the middle to allow walking through!)
+				final VoxelShape post1 = IBlock.getVoxelShapeByDirection(-4, 0, 6, 0, 16, 10, facing);
+				final VoxelShape post2 = IBlock.getVoxelShapeByDirection(16, 0, 6, 20, 16, 10, facing);
+				return VoxelShapes.union(post1, post2);
+		}
+	}
+
+	@Override
+	public VoxelShape getCollisionShape2(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		final Direction facing = IBlock.getStatePropertySafe(state, FACING);
+		final IBlock.EnumThird third = IBlock.getStatePropertySafe(state, THIRD);
+		switch (third) {
+			case UPPER:
+				return IBlock.getVoxelShapeByDirection(-20, 2, 4, 36, 16, 12, facing);
+			case MIDDLE:
+			case LOWER:
+			default:
+				// Players can freely walk between the two posts under the sign
+				final VoxelShape post1 = IBlock.getVoxelShapeByDirection(-4, 0, 6, 0, 16, 10, facing);
+				final VoxelShape post2 = IBlock.getVoxelShapeByDirection(16, 0, 6, 20, 16, 10, facing);
+				return VoxelShapes.union(post1, post2);
 		}
 	}
 

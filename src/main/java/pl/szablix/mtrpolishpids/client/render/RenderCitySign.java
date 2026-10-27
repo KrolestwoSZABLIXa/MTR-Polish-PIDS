@@ -24,6 +24,10 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 	private static final int COLOR_RAIL = 0xFF9CA0A4;
 	private static final int COLOR_SIGN_BACK = 0xFF7B7E82;
 
+	private static final float BOARD_H = 0.80f;
+	private static final float BOARD_Y_BOTTOM = 2.15f;
+	private static final float BOARD_Y_TOP = BOARD_Y_BOTTOM + BOARD_H; // 2.95f
+
 	public RenderCitySign(Argument dispatcher) {
 		super(dispatcher);
 	}
@@ -45,15 +49,23 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 		final Direction facing = IBlock.getStatePropertySafe(state, DirectionHelper.FACING);
 		final String cityName = entity.getCityName();
 		final boolean endOfTown = entity.isEndOfTown();
+		final boolean twoSided = entity.isTwoSided();
+		final String cityNameBack = entity.getCityNameBack();
+		final boolean endOfTownBack = entity.isEndOfTownBack();
 
-		final CitySignTextureManager.DynamicCitySignTexture tex = CitySignTextureManager.getSignTexture(cityName, endOfTown);
-		if (tex == null) {
+		final CitySignTextureManager.DynamicCitySignTexture texFront = CitySignTextureManager.getSignTexture(cityName, endOfTown);
+		if (texFront == null) {
 			return;
 		}
 
-		final float boardWidth = tex.worldWidth;
-		final float halfW = boardWidth / 2.0f;
-		final float postOffset = Math.max(0.35f, halfW * 0.65f);
+		final CitySignTextureManager.DynamicCitySignTexture texBack = twoSided
+				? CitySignTextureManager.getSignTexture(cityNameBack, endOfTownBack)
+				: null;
+
+		final float halfWFront = texFront.worldWidth / 2.0f;
+		final float halfWBack = (texBack != null) ? texBack.worldWidth / 2.0f : halfWFront;
+		final float maxHalfW = Math.max(halfWFront, twoSided ? halfWBack : halfWFront);
+		final float postOffset = Math.max(0.35f, maxHalfW * 0.65f);
 		final float postR = 0.04f; // 8 cm wide steel posts
 
 		// 1. Render steel posts, mounting channels, and sign backing sheet in EXTERIOR layer
@@ -62,50 +74,108 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 			gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			gh.rotateYDegrees(-facing.asRotation());
 
-			// Left post (from ground y=0 to y=2.95)
-			drawBoxShaded(gh, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 2.95f, postR, light);
+			// Left post (from ground y=0 to y=3.00)
+			drawBoxShaded(gh, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 3.00f, postR, light);
 
-			// Right post (from ground y=0 to y=2.95)
-			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 2.95f, postR, light);
+			// Right post (from ground y=0 to y=3.00)
+			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 3.00f, postR, light);
 
-			// Horizontal aluminum mounting channels behind the board
-			final float railLeft = -postOffset - 0.20f;
-			final float railRight = postOffset + 0.20f;
-			drawBox(gh, railLeft, 2.20f, 0.040f, railRight, 2.28f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, railLeft, 2.70f, 0.040f, railRight, 2.78f, 0.055f, COLOR_RAIL, light);
+			// Horizontal aluminum mounting channels behind front board
+			final float railLeftFront = -postOffset - 0.20f;
+			final float railRightFront = postOffset + 0.20f;
+			drawBox(gh, railLeftFront, 2.30f, 0.040f, railRightFront, 2.38f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, railLeftFront, 2.70f, 0.040f, railRightFront, 2.78f, 0.055f, COLOR_RAIL, light);
 
-			// Mounting clamps holding channels to posts
-			drawBox(gh, -postOffset - 0.06f, 2.18f, -0.045f, -postOffset + 0.06f, 2.30f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, -postOffset - 0.06f, 2.68f, -0.045f, -postOffset + 0.06f, 2.80f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.06f, 2.18f, -0.045f, postOffset + 0.06f, 2.30f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.06f, 2.68f, -0.045f, postOffset + 0.06f, 2.80f, 0.055f, COLOR_RAIL, light);
+			// Mounting clamps holding channels to posts (front)
+			drawBox(gh, -postOffset - 0.055f, 2.28f, -0.045f, -postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, -postOffset - 0.055f, 2.68f, -0.045f, -postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, postOffset - 0.055f, 2.28f, -0.045f, postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
+			drawBox(gh, postOffset - 0.055f, 2.68f, -0.045f, postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
 
-			// Sign backing sheet metal (galvanized steel)
-			drawBox(gh, -halfW + 0.01f, 2.01f, 0.055f, halfW - 0.01f, 2.99f, 0.070f, COLOR_SIGN_BACK, light);
+			// Front sign backing sheet metal with rounded corners
+			drawRoundedSheetMetal(gh, halfWFront, BOARD_Y_BOTTOM, BOARD_Y_TOP, 0.055f, 0.070f, COLOR_SIGN_BACK, light);
+
+			// Optional back sign mounting structure & backing sheet
+			if (twoSided) {
+				final float railLeftBack = -postOffset - 0.20f;
+				final float railRightBack = postOffset + 0.20f;
+				drawBox(gh, railLeftBack, 2.30f, -0.055f, railRightBack, 2.38f, -0.040f, COLOR_RAIL, light);
+				drawBox(gh, railLeftBack, 2.70f, -0.055f, railRightBack, 2.78f, -0.040f, COLOR_RAIL, light);
+
+				drawBox(gh, -postOffset - 0.055f, 2.28f, -0.055f, -postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
+				drawBox(gh, -postOffset - 0.055f, 2.68f, -0.055f, -postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
+				drawBox(gh, postOffset - 0.055f, 2.28f, -0.055f, postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
+				drawBox(gh, postOffset - 0.055f, 2.68f, -0.055f, postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
+
+				drawRoundedSheetMetal(gh, halfWBack, BOARD_Y_BOTTOM, BOARD_Y_TOP, -0.070f, -0.055f, COLOR_SIGN_BACK, light);
+			}
 
 			gh.pop();
 		});
 
 		// 2. Render high-resolution front face in EXTERIOR cutout layer (sharp alpha cutout, proper lighting & CCW winding)
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
+		MainRenderer.scheduleRender(texFront.identifier, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
 			gh.push();
 			gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			gh.rotateYDegrees(-facing.asRotation());
 
-			// Front face with green road sign texture (counter-clockwise quad facing +Z / SOUTH towards viewer)
-			// In drawTextureInWorld: V1=(u1, v2), V2=(u2, v2), V3=(u2, v1), V4=(u1, v1)
-			// For right-side up, top vertices V1 and V2 must receive v2=0, and bottom vertices V3 and V4 must receive v1=1.
+			// Front face with green road sign texture (facing +Z / SOUTH towards viewer)
 			gh.drawTextureInWorld(
-					halfW, 3.00f, 0.071f,
-					-halfW, 3.00f, 0.071f,
-					-halfW, 2.00f, 0.071f,
-					halfW, 2.00f, 0.071f,
+					halfWFront, BOARD_Y_TOP, 0.071f,
+					-halfWFront, BOARD_Y_TOP, 0.071f,
+					-halfWFront, BOARD_Y_BOTTOM, 0.071f,
+					halfWFront, BOARD_Y_BOTTOM, 0.071f,
 					1f, 1f, 0f, 0f,
 					Direction.SOUTH, 0xFFFFFFFF, light
 			);
 
 			gh.pop();
 		});
+
+		// 3. Render high-resolution back face in EXTERIOR cutout layer (if two-sided)
+		if (twoSided && texBack != null) {
+			MainRenderer.scheduleRender(texBack.identifier, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
+				gh.push();
+				gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
+				gh.rotateYDegrees(-facing.asRotation());
+
+				// Back face with green road sign texture (facing -Z / NORTH towards viewer behind the sign)
+				// CCW winding facing NORTH: (-halfW, top) -> (halfW, top) -> (halfW, bottom) -> (-halfW, bottom)
+				gh.drawTextureInWorld(
+						-halfWBack, BOARD_Y_TOP, -0.071f,
+						halfWBack, BOARD_Y_TOP, -0.071f,
+						halfWBack, BOARD_Y_BOTTOM, -0.071f,
+						-halfWBack, BOARD_Y_BOTTOM, -0.071f,
+						1f, 1f, 0f, 0f,
+						Direction.NORTH, 0xFFFFFFFF, light
+				);
+
+				gh.pop();
+			});
+		}
+	}
+
+	private static void drawRoundedSheetMetal(GraphicsHolder gh, float halfW, float y1, float y2, float z1, float z2, int color, int light) {
+		final float c = 0.04f; // 4 cm corner curve matching the texture's corner radius
+
+		// Main center body
+		drawBox(gh, -halfW + c, y1, z1, halfW - c, y2, z2, color, light);
+
+		// Left side between corner curves
+		drawBox(gh, -halfW, y1 + c, z1, -halfW + c, y2 - c, z2, color, light);
+
+		// Right side between corner curves
+		drawBox(gh, halfW - c, y1 + c, z1, halfW, y2 - c, z2, color, light);
+
+		// 4 corner chamfers closing the diagonal edges
+		// Top-Left corner chamfer (-X, +Y)
+		gh.drawTextureInWorld(-halfW + c, y2, z2, -halfW, y2 - c, z2, -halfW, y2 - c, z1, -halfW + c, y2, z1, 0f, 0f, 1f, 1f, Direction.UP, color, light);
+		// Top-Right corner chamfer (+X, +Y)
+		gh.drawTextureInWorld(halfW, y2 - c, z2, halfW - c, y2, z2, halfW - c, y2, z1, halfW, y2 - c, z1, 0f, 0f, 1f, 1f, Direction.UP, color, light);
+		// Bottom-Left corner chamfer (-X, -Y)
+		gh.drawTextureInWorld(-halfW, y1 + c, z2, -halfW + c, y1, z2, -halfW + c, y1, z1, -halfW, y1 + c, z1, 0f, 0f, 1f, 1f, Direction.DOWN, color, light);
+		// Bottom-Right corner chamfer (+X, -Y)
+		gh.drawTextureInWorld(halfW - c, y1, z2, halfW, y1 + c, z2, halfW, y1 + c, z1, halfW - c, y1, z1, 0f, 0f, 1f, 1f, Direction.DOWN, color, light);
 	}
 
 	private static void drawBoxShaded(GraphicsHolder gh, float x1, float y1, float z1, float x2, float y2, float z2, int light) {

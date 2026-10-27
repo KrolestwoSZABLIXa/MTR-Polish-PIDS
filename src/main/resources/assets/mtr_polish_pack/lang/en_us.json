@@ -12,7 +12,10 @@
 	"gui.mtr_polish_pack.clock_right": "Right",
 	"gui.mtr_polish_pack.clock_left": "Left",
 	"gui.mtr_polish_pack.city_sign_title": "City Sign Settings",
-	"gui.mtr_polish_pack.city_name": "City Name:",
-	"gui.mtr_polish_pack.end_of_town": "End of Town (Sign E-18a)",
+	"gui.mtr_polish_pack.city_name_front": "City name (front):",
+	"gui.mtr_polish_pack.end_of_town_front": "End of town E-18a (front)",
+	"gui.mtr_polish_pack.two_sided": "Double-sided sign (add back board)",
+	"gui.mtr_polish_pack.city_name_back": "City name (back):",
+	"gui.mtr_polish_pack.end_of_town_back": "End of town E-18a (back)",
 	"gui.mtr_polish_pack.save": "Save"
 }

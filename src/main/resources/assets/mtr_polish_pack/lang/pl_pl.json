@@ -12,7 +12,10 @@
 	"gui.mtr_polish_pack.clock_right": "Prawa",
 	"gui.mtr_polish_pack.clock_left": "Lewa",
 	"gui.mtr_polish_pack.city_sign_title": "Ustawienia tablicy miejscowości",
-	"gui.mtr_polish_pack.city_name": "Nazwa miejscowości:",
-	"gui.mtr_polish_pack.end_of_town": "Koniec miejscowości (Znak E-18a)",
+	"gui.mtr_polish_pack.city_name_front": "Nazwa miejscowości (przód):",
+	"gui.mtr_polish_pack.end_of_town_front": "Koniec miejscowości E-18a (przód)",
+	"gui.mtr_polish_pack.two_sided": "Tablica dwustronna (dodaj tablicę z tyłu)",
+	"gui.mtr_polish_pack.city_name_back": "Nazwa miejscowości (tył):",
+	"gui.mtr_polish_pack.end_of_town_back": "Koniec miejscowości E-18a (tył)",
 	"gui.mtr_polish_pack.save": "Zapisz"
 }
