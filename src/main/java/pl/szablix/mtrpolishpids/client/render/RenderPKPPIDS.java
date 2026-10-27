@@ -44,8 +44,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	// Ultra-thin layer offset (0.4 mm per layer, 1.2 mm total) so font lies completely flat on the glass
 	private static final float LAYER_OFFSET = 0.0004f;
 
-	// Colors directly from authentic PKP PLK CSDIP specifications (RAL 5002 Ultramarine Blue)
-	private static final int COLOR_BADGE_BG = 0xFF002478;   // Authentic PKP PLK RAL 5002 deep display blue (no neon bloom)
+	// Colors directly from authentic PKP PLK CSDIP specifications
+	private static final int COLOR_BADGE_BG = 0xFF000A64;   // Authentic PKP PLK display navy blue (#000a64, exact color on shaders)
 	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
 	private static final int COLOR_WHITE = 0xFFD0D8E8;      // Balanced LCD white: eliminates blinding shader flare/bloom while staying crisp
 	private static final int COLOR_CASING_TEXT = 0xFFD8E0EC;// Painted white lettering for metal casing (non-emissive)
@@ -81,16 +81,16 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer (luminous self-illuminated screen)
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
+		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in EXTERIOR layer (solid albedo, exact #000A64 color without shader distortion)
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Clock Face on TEXTURE_CLOCK_FACE in LIGHT layer (luminous clock)
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.LIGHT, (graphicsHolder, offset) -> {
+		// 2. Clock Face on TEXTURE_CLOCK_FACE in EXTERIOR layer (crisp dial, no shader washout)
+		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
