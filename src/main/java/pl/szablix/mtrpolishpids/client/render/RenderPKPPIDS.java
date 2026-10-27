@@ -46,9 +46,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 	// Colors directly from authentic PKP PLK CSDIP specifications (RAL 5002 Ultramarine Blue)
 	private static final int COLOR_SCREEN_BG = 0xFF08080C;  // Authentic PKP deep black screen glass
-	private static final int COLOR_BADGE_BG = 0xFF002EA8;   // Authentic PKP PLK RAL 5002 vibrant display blue
-	private static final int COLOR_RED_LINE = 0xFFFF0000;   // color: 16711680
-	private static final int COLOR_WHITE = 0xFFFFFFFF;      // color: 16777215
+	private static final int COLOR_BADGE_BG = 0xFF002478;   // Authentic PKP PLK RAL 5002 deep display blue (no neon bloom)
+	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
+	private static final int COLOR_WHITE = 0xFFD0D8E8;      // Balanced LCD white: eliminates blinding shader flare/bloom while staying crisp
+	private static final int COLOR_CASING_TEXT = 0xFFD8E0EC;// Painted white lettering for metal casing (non-emissive)
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
 
 	public RenderPKPPIDS(Argument dispatcher) {
@@ -72,13 +73,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		if (entity.getPlatformIds().isEmpty()) {
 			final LongArrayList platformIds = new LongArrayList();
 			InitClient.findClosePlatform(entity.getPos2().down(4), 5, platform -> platformIds.add(platform.getId()));
-			getArrivalsAndRender(entity, blockPos, facing, platformIds);
+			getArrivalsAndRender(entity, blockPos, facing, platformIds, light);
 		} else {
-			getArrivalsAndRender(entity, blockPos, facing, entity.getPlatformIds());
+			getArrivalsAndRender(entity, blockPos, facing, entity.getPlatformIds(), light);
 		}
 	}
 
-	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds) {
+	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
 		// 1. Quads (Rectangles and Clock Hands) on TEXTURE_WHITE in LIGHT layer (luminous self-illuminated screen)
@@ -98,9 +99,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		});
 
 		// 3. Dynamic Text (Java2D HarfBuzz typography with native kerning and zero distortion)
-		renderSideDynamicText(entity, blockPos, facing, arrivalResponseList, false);
+		renderSideDynamicText(entity, blockPos, facing, arrivalResponseList, false, light);
 		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-			renderSideDynamicText(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, true);
+			renderSideDynamicText(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, true, light);
 		}
 	}
 
@@ -193,12 +194,12 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.SOUTH, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
 
 		graphicsHolder.pop();
 	}
 
-	private void renderSideDynamicText(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, boolean isBackSide) {
+	private void renderSideDynamicText(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, boolean isBackSide, int light) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
@@ -209,9 +210,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
 		final String platformName = arrival != null ? arrival.getPlatformName() : "";
 
-		// 1. Casing plate (Ipi-1): "peron X" and "platform" in Myriad Pro
+		// 1. Casing plate (Ipi-1): "peron X" and "platform" in Myriad Pro (non-emissive painted casing text)
 		final PKPTextTextureManager.DynamicTextTexture casingTex = PKPTextTextureManager.getCasingPlate(platformName);
-		renderStaticTexture(entity, blockPos, facing, isBackSide, casingTex, 13.125f, 0.65f, 2.10f, 8.0f, HorizontalAlignment.LEFT);
+		renderCasingTexture(entity, blockPos, facing, isBackSide, casingTex, 13.125f, 0.65f, 2.10f, 8.0f, HorizontalAlignment.LEFT, light);
 
 		final String customMessage = entity.getMessage(0);
 		final boolean hideArrival = entity.getHideArrival(0);
@@ -308,10 +309,49 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
 			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, 0xFFFFFFFF, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
 
 			graphicsHolder.pop();
 		});
+	}
+
+	private static void scheduleCasingTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float w, float h, float u1, float v1, float u2, float v2, int light) {
+		if (tex == null || w <= 0.001f || h <= 0.001f) {
+			return;
+		}
+
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR_TRANSLUCENT, (graphicsHolder, offset) -> {
+			graphicsHolder.push();
+			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
+			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
+			graphicsHolder.rotateZDegrees(180);
+			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
+			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
+
+			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, light);
+
+			graphicsHolder.pop();
+		});
+	}
+
+	private static void renderCasingTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align, int light) {
+		if (tex == null) {
+			return;
+		}
+
+		float w = targetH * tex.getAspectRatio();
+		float drawX = x;
+		if (w > maxW) {
+			w = maxW; // scale down horizontally to fit bounds exactly
+		} else {
+			if (align == HorizontalAlignment.CENTER) {
+				drawX = x + (maxW - w) / 2f;
+			} else if (align == HorizontalAlignment.RIGHT) {
+				drawX = x + (maxW - w);
+			}
+		}
+
+		scheduleCasingTexture(entity, blockPos, facing, tex, drawX, y, w, targetH, 0f, 0f, 1f, 1f, light);
 	}
 
 	private static void renderStaticTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align) {
