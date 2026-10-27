@@ -50,6 +50,8 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 					final boolean endOfTown = citySignEntity.isEndOfTown();
 					if (!world.isClient()) {
 						world.updateListeners(rootPos, world.getBlockState(rootPos), world.getBlockState(rootPos), 3);
+						world.updateListeners(rootPos.up(), world.getBlockState(rootPos.up()), world.getBlockState(rootPos.up()), 3);
+						world.updateListeners(rootPos.up(2), world.getBlockState(rootPos.up(2)), world.getBlockState(rootPos.up(2)), 3);
 						player.sendMessage(Text.cast(TextHelper.translatable(endOfTown ? "message.mtr_polish_pack.city_sign_e18a" : "message.mtr_polish_pack.city_sign_e17a", citySignEntity.getCityName())), true);
 					}
 				} else {
@@ -154,8 +156,8 @@ public class BlockCitySign extends BlockExtension implements DirectionHelper, Bl
 				break;
 		}
 
-		float postOffset = 0.65f;
-		float halfW = 1.2f;
+		float halfW = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getSignHalfWidth("Warszawa");
+		float postOffset = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getPostOffset(halfW);
 		final BlockEntity entity = world.getBlockEntity(rootPos);
 		if (entity != null && entity.data instanceof BlockEntityCitySign) {
 			final BlockEntityCitySign citySignEntity = (BlockEntityCitySign) entity.data;

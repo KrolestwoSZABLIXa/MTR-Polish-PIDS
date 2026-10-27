@@ -72,10 +72,12 @@ public class CitySignTextureManager {
 			return existing;
 		}
 
+		final int width = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getPixelWidth(cityName);
+		final float worldWidth = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getSignHalfWidth(cityName) * 2.0f;
 		final float fontSize = 125f;
-		final Font font = FONT_DROGOWSKAZ.deriveFont(Font.PLAIN, fontSize);
+		final Font font = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getFont().deriveFont(Font.PLAIN, fontSize);
 
-		// 1. Measure text width with Drogowskaz font
+		// 1. Measure text width for centering
 		final BufferedImage probe = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D gProbe = probe.createGraphics();
 		gProbe.setFont(font);
@@ -83,14 +85,7 @@ public class CitySignTextureManager {
 		final int textWidth = fm.stringWidth(cityName);
 		gProbe.dispose();
 
-		// 2. Calculate sign dimensions
 		final int height = 256;
-		final int paddingX = 85;
-		int width = Math.max(450, textWidth + paddingX * 2);
-		if ((width % 2) != 0) {
-			width++; // ensure even pixel dimension
-		}
-
 		final BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D g = img.createGraphics();
 		setupQualityHints(g);
@@ -127,9 +122,6 @@ public class CitySignTextureManager {
 		}
 
 		g.dispose();
-
-		// 7. Dynamic width in Minecraft world blocks: 256px height = 0.80 block height (sleeker, realistic proportions)
-		final float worldWidth = (width / 256.0f) * 0.80f;
 
 		return registerTexture(cacheKey, img, width, height, worldWidth);
 	}

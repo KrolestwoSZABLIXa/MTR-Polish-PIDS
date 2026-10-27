@@ -64,6 +64,8 @@ public class PacketUpdateCitySign extends PacketHandler {
 			citySignEntity.setCityNameBack(cityNameBack);
 			citySignEntity.setEndOfTownBack(endOfTownBack);
 			world.updateListeners(blockPos, world.getBlockState(blockPos), world.getBlockState(blockPos), 3);
+			world.updateListeners(blockPos.up(), world.getBlockState(blockPos.up()), world.getBlockState(blockPos.up()), 3);
+			world.updateListeners(blockPos.up(2), world.getBlockState(blockPos.up(2)), world.getBlockState(blockPos.up(2)), 3);
 		}
 	}
 }

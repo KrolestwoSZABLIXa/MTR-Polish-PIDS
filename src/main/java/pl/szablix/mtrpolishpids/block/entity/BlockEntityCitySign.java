@@ -95,35 +95,15 @@ public class BlockEntityCitySign extends BlockEntityExtension {
 	}
 
 	public float getPostOffset() {
-		final float halfWFront = estimateHalfWidth(cityName);
-		final float halfWBack = twoSided ? estimateHalfWidth(cityNameBack) : halfWFront;
+		final float halfWFront = CitySignGeometry.getSignHalfWidth(cityName);
+		final float halfWBack = twoSided ? CitySignGeometry.getSignHalfWidth(cityNameBack) : halfWFront;
 		final float maxHalfW = Math.max(halfWFront, halfWBack);
-		return Math.max(0.38f, maxHalfW * 0.65f);
+		return CitySignGeometry.getPostOffset(maxHalfW);
 	}
 
 	public float getHalfWidth() {
-		final float halfWFront = estimateHalfWidth(cityName);
-		final float halfWBack = twoSided ? estimateHalfWidth(cityNameBack) : halfWFront;
+		final float halfWFront = CitySignGeometry.getSignHalfWidth(cityName);
+		final float halfWBack = twoSided ? CitySignGeometry.getSignHalfWidth(cityNameBack) : halfWFront;
 		return Math.max(halfWFront, halfWBack);
-	}
-
-	public static float estimateHalfWidth(String name) {
-		if (name == null || name.trim().isEmpty()) {
-			name = "Warszawa";
-		}
-		int textPx = 0;
-		for (char c : name.trim().toCharArray()) {
-			if ("ijlftI1r.':,;|! ".indexOf(c) >= 0) {
-				textPx += 40;
-			} else if ("mwMW@%#".indexOf(c) >= 0) {
-				textPx += 95;
-			} else if (Character.isUpperCase(c)) {
-				textPx += 75;
-			} else {
-				textPx += 65;
-			}
-		}
-		final int totalPx = Math.max(450, textPx + 170);
-		return (totalPx / 256.0f * 0.80f) / 2.0f;
 	}
 }

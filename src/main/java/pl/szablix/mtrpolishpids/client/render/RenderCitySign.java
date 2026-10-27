@@ -65,7 +65,7 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 		final float halfWFront = texFront.worldWidth / 2.0f;
 		final float halfWBack = (texBack != null) ? texBack.worldWidth / 2.0f : halfWFront;
 		final float maxHalfW = Math.max(halfWFront, twoSided ? halfWBack : halfWFront);
-		final float postOffset = Math.max(0.38f, maxHalfW * 0.65f);
+		final float postOffset = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getPostOffset(maxHalfW);
 		final float postR = 0.04f; // 8 cm wide steel posts
 
 		// 1. Render steel posts, mounting channels, and sign backing sheet in EXTERIOR layer
