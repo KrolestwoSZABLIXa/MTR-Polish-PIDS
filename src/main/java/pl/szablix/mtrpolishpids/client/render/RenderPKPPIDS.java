@@ -52,13 +52,53 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
 
 	private static final java.util.Map<Identifier, org.mtr.mapping.holder.RenderLayer> EMISSIVE_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+	private static final java.util.Map<Identifier, org.mtr.mapping.holder.RenderLayer> BEACON_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
 
-	public static org.mtr.mapping.holder.RenderLayer getEmissiveLayer(Identifier id) {
-		return EMISSIVE_CACHE.computeIfAbsent(id, key -> new org.mtr.mapping.holder.RenderLayer(
-				net.minecraft.client.render.RenderLayer.getEntityTranslucentEmissive(
-						new net.minecraft.util.Identifier(key.getNamespace(), key.getPath())
-				)
-		));
+	private static boolean checkIris() {
+		try {
+			final Class<?> irisClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+			final Object instance = irisClass.getMethod("getInstance").invoke(null);
+			return Boolean.TRUE.equals(irisClass.getMethod("isShaderPackInUse").invoke(instance));
+		} catch (Throwable t1) {
+			try {
+				final Class<?> iris = Class.forName("net.irisshaders.iris.Iris");
+				final Object pack = iris.getMethod("getCurrentPack").invoke(null);
+				if (pack instanceof java.util.Optional) {
+					return ((java.util.Optional<?>) pack).isPresent();
+				}
+			} catch (Throwable ignored) {}
+			return false;
+		}
+	}
+
+	private static boolean checkOptifine() {
+		try {
+			final Class<?> config = Class.forName("optifine.Config");
+			return Boolean.TRUE.equals(config.getMethod("isShaders").invoke(null));
+		} catch (Throwable ignored) {
+			return false;
+		}
+	}
+
+	public static boolean isShaderActive() {
+		return checkIris() || checkOptifine();
+	}
+
+	public static org.mtr.mapping.holder.RenderLayer getDisplayLayer(Identifier id) {
+		if (isShaderActive()) {
+			return EMISSIVE_CACHE.computeIfAbsent(id, key -> new org.mtr.mapping.holder.RenderLayer(
+					net.minecraft.client.render.RenderLayer.getEntityTranslucentEmissive(
+							new net.minecraft.util.Identifier(key.getNamespace(), key.getPath())
+					)
+			));
+		} else {
+			return BEACON_CACHE.computeIfAbsent(id, key -> new org.mtr.mapping.holder.RenderLayer(
+					net.minecraft.client.render.RenderLayer.getBeaconBeam(
+							new net.minecraft.util.Identifier(key.getNamespace(), key.getPath()),
+							true
+					)
+			));
+		}
 	}
 
 	public RenderPKPPIDS(Argument dispatcher) {
@@ -91,18 +131,18 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Clock Face on TEXTURE_CLOCK_FACE in TEXT layer using EntityTranslucentEmissive (true emissive, zero bloom flare)
+		// 1. Clock Face & Hands on TEXTURE_CLOCK_FACE in TEXT layer (both drawn in same BufferBuilder to prevent occlusion on shaders)
 		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getEmissiveLayer(TEXTURE_CLOCK_FACE));
+			graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_CLOCK_FACE));
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Quads (Navy screen, clock hands, red accent line) on TEXTURE_WHITE in TEXT layer using EntityTranslucentEmissive
+		// 2. Quads (Navy screen, red accent line) on TEXTURE_WHITE in TEXT layer
 		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getEmissiveLayer(TEXTURE_WHITE));
+			graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_WHITE));
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
@@ -122,9 +162,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
-		final float clockCenterX = isClockOnRight ? 28.25f : 3.75f;
-		final float clockCenterY = 5.0f;
-		final float clockRadius = 1.90f;
 
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
@@ -154,33 +191,6 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			graphicsHolder.pop();
 		}
 
-		// Layer 2: Real-time clock hands (on top of Layer 1 clock face)
-		final LocalTime now = LocalTime.now();
-		final float hours = now.getHour() % 12f;
-		final float minutes = now.getMinute();
-		final float seconds = now.getSecond();
-		final float hourAngle = (hours + minutes / 60f + seconds / 3600f) * 30f;
-		final float minuteAngle = (minutes + seconds / 60f) * 6f;
-
-		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 2);
-
-		// Hour hand
-		graphicsHolder.push();
-		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
-		graphicsHolder.rotateZDegrees(hourAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.11f, -clockRadius * 0.55f, 0, 0.11f, clockRadius * 0.12f, 0, Direction.SOUTH, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
-
-		// Minute hand
-		graphicsHolder.push();
-		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
-		graphicsHolder.rotateZDegrees(minuteAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.08f, -clockRadius * 0.82f, 0, 0.08f, clockRadius * 0.12f, 0, Direction.SOUTH, COLOR_CLOCK_HAND, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
-
-		graphicsHolder.pop();
-
 		graphicsHolder.pop();
 	}
 
@@ -199,7 +209,39 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
+		// 1. Clock dial face (full texture UV 0..1)
 		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+
+		// 2. Real-time clock hands (drawn in the SAME bufferBuilder using black corner UV (0..0.04) of pkp_clock_face.png)
+		// Being in the same BufferBuilder guarantees Iris/shaders will NEVER draw the dial over the hands!
+		final LocalTime now = LocalTime.now();
+		final float hours = now.getHour() % 12f;
+		final float minutes = now.getMinute();
+		final float seconds = now.getSecond();
+		final float hourAngle = (hours + minutes / 60f + seconds / 3600f) * 30f;
+		final float minuteAngle = (minutes + seconds / 60f) * 6f;
+
+		graphicsHolder.push();
+		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
+
+		// Hour hand
+		graphicsHolder.push();
+		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
+		graphicsHolder.rotateZDegrees(hourAngle);
+		IDrawing.drawTexture(graphicsHolder, -0.11f, -clockRadius * 0.55f, 0, 0.11f, clockRadius * 0.12f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		graphicsHolder.pop();
+
+		// Minute hand
+		graphicsHolder.push();
+		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
+		graphicsHolder.rotateZDegrees(minuteAngle);
+		IDrawing.drawTexture(graphicsHolder, -0.08f, -clockRadius * 0.82f, 0, 0.08f, clockRadius * 0.12f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		graphicsHolder.pop();
+
+		// Center pivot pin (subtle black dot covering the hand intersection)
+		IDrawing.drawTexture(graphicsHolder, clockCenterX - 0.14f, clockCenterY - 0.14f, 0, clockCenterX + 0.14f, clockCenterY + 0.14f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+
+		graphicsHolder.pop();
 
 		graphicsHolder.pop();
 	}
@@ -224,7 +266,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
-				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoRegular(), 62f, Color.WHITE);
+				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoMedium(), 62f, Color.WHITE);
 				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, displayX + 0.6f, 3.85f, 2.25f, boxWidth - 1.2f, HorizontalAlignment.LEFT);
 			}
 		} else {
@@ -309,7 +351,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		}
 
 		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getEmissiveLayer(tex.identifier));
+			graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
