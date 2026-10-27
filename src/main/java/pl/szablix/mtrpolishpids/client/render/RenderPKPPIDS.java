@@ -131,9 +131,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Clock Face & Hands on TEXTURE_CLOCK_FACE in TEXT layer (both drawn in same BufferBuilder to prevent occlusion on shaders)
-		MainRenderer.scheduleRender(TEXTURE_CLOCK_FACE, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_CLOCK_FACE));
+		// 1. Clock Face & Hands on dynamic clock texture in TEXT layer (integrated texture guarantees hands are 100% visible on shaders)
+		final Identifier clockTextureId = PKPTextTextureManager.getClockTexture();
+		MainRenderer.scheduleRender(clockTextureId, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
+			graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
@@ -209,39 +210,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		// 1. Clock dial face (full texture UV 0..1)
+		// Single draw call: Dynamic clock dial with integrated real-time hands (100% visible on shaders and vanilla)
 		IDrawing.drawTexture(graphicsHolder, clockCenterX - clockRadius, clockCenterY - clockRadius, 0, clockCenterX + clockRadius, clockCenterY + clockRadius, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-
-		// 2. Real-time clock hands (drawn in the SAME bufferBuilder using black corner UV (0..0.04) of pkp_clock_face.png)
-		// Being in the same BufferBuilder guarantees Iris/shaders will NEVER draw the dial over the hands!
-		final LocalTime now = LocalTime.now();
-		final float hours = now.getHour() % 12f;
-		final float minutes = now.getMinute();
-		final float seconds = now.getSecond();
-		final float hourAngle = (hours + minutes / 60f + seconds / 3600f) * 30f;
-		final float minuteAngle = (minutes + seconds / 60f) * 6f;
-
-		graphicsHolder.push();
-		graphicsHolder.translate(0, 0, -LAYER_OFFSET * 1);
-
-		// Hour hand
-		graphicsHolder.push();
-		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
-		graphicsHolder.rotateZDegrees(hourAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.11f, -clockRadius * 0.55f, 0, 0.11f, clockRadius * 0.12f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
-
-		// Minute hand
-		graphicsHolder.push();
-		graphicsHolder.translate(clockCenterX, clockCenterY, 0);
-		graphicsHolder.rotateZDegrees(minuteAngle);
-		IDrawing.drawTexture(graphicsHolder, -0.08f, -clockRadius * 0.82f, 0, 0.08f, clockRadius * 0.12f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-		graphicsHolder.pop();
-
-		// Center pivot pin (subtle black dot covering the hand intersection)
-		IDrawing.drawTexture(graphicsHolder, clockCenterX - 0.14f, clockCenterY - 0.14f, 0, clockCenterX + 0.14f, clockCenterY + 0.14f, 0, 0f, 0f, 0.04f, 0.04f, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
-
-		graphicsHolder.pop();
 
 		graphicsHolder.pop();
 	}

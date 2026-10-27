@@ -318,6 +318,105 @@ public class PKPTextTextureManager {
 		return result;
 	}
 
+	private static BufferedImage BASE_CLOCK_DIAL;
+	private static NativeImageBackedTexture CLOCK_TEXTURE;
+	private static NativeImage CLOCK_NATIVE_IMAGE;
+	private static Identifier CLOCK_TEXTURE_IDENTIFIER;
+	private static int LAST_CLOCK_SECOND = -1;
+	private static final BufferedImage CLOCK_FRAME = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+
+	/**
+	 * Returns the dynamic analog clock texture with real-time hands drawn directly onto the dial.
+	 * Because the hands and dial are part of a single texture, shaders (Iris/OptiFine) cannot
+	 * occlude, discard, or wash out the clock hands.
+	 */
+	public static synchronized Identifier getClockTexture() {
+		final java.time.LocalTime now = java.time.LocalTime.now();
+		final int currentSecond = now.toSecondOfDay();
+
+		if (CLOCK_TEXTURE_IDENTIFIER != null && currentSecond == LAST_CLOCK_SECOND) {
+			return CLOCK_TEXTURE_IDENTIFIER;
+		}
+
+		LAST_CLOCK_SECOND = currentSecond;
+
+		if (BASE_CLOCK_DIAL == null) {
+			try (InputStream is = PKPTextTextureManager.class.getResourceAsStream("/assets/mtr_polish_pack/textures/block/pkp_clock_face.png")) {
+				if (is != null) {
+					BASE_CLOCK_DIAL = javax.imageio.ImageIO.read(is);
+				}
+			} catch (Exception e) {
+				MTRPolishPIDS.LOGGER.error("Failed to load pkp_clock_face.png for dynamic clock", e);
+			}
+		}
+
+		final Graphics2D g = CLOCK_FRAME.createGraphics();
+		try {
+			if (BASE_CLOCK_DIAL != null) {
+				g.drawImage(BASE_CLOCK_DIAL, 0, 0, null);
+			} else {
+				g.setColor(Color.WHITE);
+				g.fillOval(10, 10, 236, 236);
+			}
+
+			setupQualityHints(g);
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			final float hours = now.getHour() % 12f;
+			final float minutes = now.getMinute();
+			final float seconds = now.getSecond();
+			final double hourAngle = Math.toRadians((hours + minutes / 60f + seconds / 3600f) * 30.0);
+			final double minuteAngle = Math.toRadians((minutes + seconds / 60f) * 6.0);
+
+			final Color handColor = new Color(0x14, 0x18, 0x24);
+			final java.awt.geom.AffineTransform baseTransform = g.getTransform();
+
+			// Hour hand: length 65px towards 12, tail 10px, width 10px
+			g.translate(128, 128);
+			g.rotate(hourAngle);
+			g.setColor(handColor);
+			g.fillRoundRect(-5, -65, 10, 75, 3, 3);
+
+			// Minute hand: length 97px towards 12, tail 18px (counterweight), width 7px
+			g.setTransform(baseTransform);
+			g.translate(128, 128);
+			g.rotate(minuteAngle);
+			g.setColor(handColor);
+			g.fillRoundRect(-3, -97, 7, 115, 3, 3);
+
+			// Center pivot pin (diameter 20px)
+			g.setTransform(baseTransform);
+			g.setColor(handColor);
+			g.fillOval(128 - 10, 128 - 10, 20, 20);
+		} finally {
+			g.dispose();
+		}
+
+		if (CLOCK_NATIVE_IMAGE == null) {
+			CLOCK_NATIVE_IMAGE = new NativeImage(256, 256, false);
+			CLOCK_TEXTURE = new NativeImageBackedTexture(CLOCK_NATIVE_IMAGE);
+			CLOCK_TEXTURE.setFilter(true, false);
+			final net.minecraft.util.Identifier mcId = MinecraftClient.getInstance().getTextureManager()
+					.registerDynamicTexture("pkp_dynamic_clock", CLOCK_TEXTURE);
+			CLOCK_TEXTURE_IDENTIFIER = new Identifier(mcId.getNamespace(), mcId.getPath());
+		}
+
+		for (int y = 0; y < 256; y++) {
+			for (int x = 0; x < 256; x++) {
+				final int argb = CLOCK_FRAME.getRGB(x, y);
+				final int a = (argb >> 24) & 0xFF;
+				final int pr = (argb >> 16) & 0xFF;
+				final int pg = (argb >> 8) & 0xFF;
+				final int pb = argb & 0xFF;
+				final int abgr = (a << 24) | (pb << 16) | (pg << 8) | pr;
+				CLOCK_NATIVE_IMAGE.setColor(x, y, abgr);
+			}
+		}
+
+		CLOCK_TEXTURE.upload();
+		return CLOCK_TEXTURE_IDENTIFIER;
+	}
+
 	private static void cleanupCache() {
 		final long now = System.currentTimeMillis();
 		CACHE.entrySet().removeIf(entry -> {
