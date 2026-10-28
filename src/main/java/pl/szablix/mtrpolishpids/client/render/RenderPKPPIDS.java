@@ -212,7 +212,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float clockCenterY = 5.0f;
 		final float clockRadius = 1.90f;
 
-		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(clockTextureId));
+		graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -331,7 +331,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(tex.identifier));
+		graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
