@@ -20,8 +20,7 @@ import org.mtr.mod.client.IDrawing;
 import org.mtr.mod.client.MinecraftClientData;
 import org.mtr.mod.data.ArrivalsCacheClient;
 import org.mtr.mod.data.IGui;
-import org.mtr.mod.render.MainRenderer;
-import org.mtr.mod.render.QueuedRenderLayer;
+import org.mtr.mod.render.MoreRenderLayers;
 
 import java.awt.Color;
 import java.time.Instant;
@@ -122,50 +121,46 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		if (entity.getPlatformIds().isEmpty()) {
 			final LongArrayList platformIds = new LongArrayList();
 			InitClient.findClosePlatform(entity.getPos2().down(4), 5, platform -> platformIds.add(platform.getId()));
-			getArrivalsAndRender(entity, blockPos, facing, platformIds, light);
+			getArrivalsAndRender(entity, blockPos, facing, platformIds, graphicsHolder, light);
 		} else {
-			getArrivalsAndRender(entity, blockPos, facing, entity.getPlatformIds(), light);
+			getArrivalsAndRender(entity, blockPos, facing, entity.getPlatformIds(), graphicsHolder, light);
 		}
 	}
 
-	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
+	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, GraphicsHolder graphicsHolder, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
+		final BlockPos origin = blockPos;
 
 		// 1. Clock Face & Hands on dynamic clock texture in TEXT layer (integrated texture guarantees hands are 100% visible on shaders)
 		final Identifier clockTextureId = PKPTextTextureManager.getClockTexture();
-		MainRenderer.scheduleRender(clockTextureId, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
-			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
-			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
-			}
-		});
+		renderSideClockFace(entity, origin, blockPos, facing, graphicsHolder, clockTextureId, false);
+		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
+			renderSideClockFace(entity, origin, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, clockTextureId, true);
+		}
 
 		// 2. Quads (Navy screen, red accent line) on TEXTURE_WHITE in TEXT layer
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_WHITE));
-			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
-			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
-			}
-		});
+		renderSideQuads(entity, origin, blockPos, facing, arrivalResponseList, graphicsHolder, false);
+		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
+			renderSideQuads(entity, origin, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, true);
+		}
 
 		// 3. Dynamic Text (Java2D HarfBuzz typography with native kerning and zero distortion)
-		renderSideDynamicText(entity, blockPos, facing, arrivalResponseList, false, light);
+		renderSideDynamicText(entity, origin, blockPos, facing, arrivalResponseList, graphicsHolder, false, light);
 		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-			renderSideDynamicText(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, true, light);
+			renderSideDynamicText(entity, origin, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, true, light);
 		}
 	}
 
-	private void renderSideQuads(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
+	private void renderSideQuads(BlockEntityPKPPIDS entity, BlockPos origin, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, GraphicsHolder graphicsHolder, boolean isBackSide) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 
+		graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_WHITE));
 		graphicsHolder.push();
-		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
+		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16);
@@ -214,7 +209,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
-	private void renderSideClockFace(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, GraphicsHolder graphicsHolder, Vector3d offset, boolean isBackSide) {
+	private void renderSideClockFace(BlockEntityPKPPIDS entity, BlockPos origin, BlockPos blockPos, Direction facing, GraphicsHolder graphicsHolder, Identifier clockTextureId, boolean isBackSide) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
@@ -222,8 +217,9 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float clockCenterY = 5.0f;
 		final float clockRadius = 1.90f;
 
+		graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
 		graphicsHolder.push();
-		graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
+		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
@@ -235,7 +231,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.pop();
 	}
 
-	private void renderSideDynamicText(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, boolean isBackSide, int light) {
+	private void renderSideDynamicText(BlockEntityPKPPIDS entity, BlockPos origin, BlockPos blockPos, Direction facing, ObjectArrayList<ArrivalResponse> arrivalResponseList, GraphicsHolder graphicsHolder, boolean isBackSide, int light) {
 		final boolean clockConfigRight = entity.isClockOnRight();
 		final boolean isClockOnRight = isBackSide ? !clockConfigRight : clockConfigRight;
 
@@ -248,7 +244,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 		// 1. Casing plate (Ipi-1): "peron X" and "platform" in Myriad Pro (non-emissive painted casing text)
 		final PKPTextTextureManager.DynamicTextTexture casingTex = PKPTextTextureManager.getCasingPlate(platformName);
-		renderCasingTexture(entity, blockPos, facing, isBackSide, casingTex, 13.125f, 0.65f, 2.10f, 8.0f, HorizontalAlignment.LEFT, light);
+		renderCasingTexture(graphicsHolder, origin, blockPos, facing, isBackSide, casingTex, 13.125f, 0.65f, 2.10f, 8.0f, HorizontalAlignment.LEFT, light);
 
 		final String customMessage = entity.getMessage(0);
 		final boolean hideArrival = entity.getHideArrival(0);
@@ -256,7 +252,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		if (hideArrival || arrival == null) {
 			if (!customMessage.isEmpty()) {
 				final PKPTextTextureManager.DynamicTextTexture customTex = PKPTextTextureManager.getText("custom", customMessage, PKPTextTextureManager.getRobotoMedium(), 62f, Color.WHITE);
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, customTex, displayX + 0.6f, 3.85f, 2.25f, boxWidth - 1.2f, HorizontalAlignment.LEFT);
+				renderScrollingOrStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, customTex, displayX + 0.6f, 3.85f, 2.25f, boxWidth - 1.2f, HorizontalAlignment.LEFT);
 			}
 		} else {
 			// Scheduled Departure Time (fixed timetable time, unshifted by real-time delay)
@@ -269,7 +265,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final String departureTimeText = String.format("%02d:%02d", depTime.getHour(), depTime.getMinute());
 
 			final PKPTextTextureManager.DynamicTextTexture timeTex = PKPTextTextureManager.getText("time", departureTimeText, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
-			renderStaticTexture(entity, blockPos, facing, isBackSide, timeTex, displayX, 2.65f, 2.35f, 5.125f, HorizontalAlignment.CENTER);
+			renderStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, timeTex, displayX, 2.65f, 2.35f, 5.125f, HorizontalAlignment.CENTER);
 
 			// Train Line / Route Number on white badge (black text, scrolls smoothly if long)
 			final String lineName = arrival.getRouteNumber().isEmpty() ? arrival.getRouteName() : arrival.getRouteNumber();
@@ -278,17 +274,17 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				final float badgeW = 5.125f;
 				final float badgeH = 0.92f;
 				final float badgeY = 5.53f;
-				renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, lineTex, displayX + 0.2f, badgeY, badgeH, badgeW - 0.4f, HorizontalAlignment.CENTER);
+				renderScrollingOrStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, lineTex, displayX + 0.2f, badgeY, badgeH, badgeW - 0.4f, HorizontalAlignment.CENTER);
 			}
 
 			// Destination Station
 			final String destination = arrival.getDestination();
 			final PKPTextTextureManager.DynamicTextTexture destTex = PKPTextTextureManager.getText("dest", destination, PKPTextTextureManager.getRobotoMedium(), 64f, Color.WHITE);
-			renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, destTex, textX, 2.65f, 2.35f, 18.00f, HorizontalAlignment.LEFT);
+			renderScrollingOrStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, destTex, textX, 2.65f, 2.35f, 18.00f, HorizontalAlignment.LEFT);
 
 			// "Przez / Via" label - always displayed on board for active arrivals
 			final PKPTextTextureManager.DynamicTextTexture viaLblTex = PKPTextTextureManager.getText("via_lbl", "Przez / Via", PKPTextTextureManager.getRobotoItalic(), 34f, Color.WHITE);
-			renderStaticTexture(entity, blockPos, facing, isBackSide, viaLblTex, textX, 4.90f, 0.80f, 4.875f, HorizontalAlignment.LEFT);
+			renderStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, viaLblTex, textX, 4.90f, 0.80f, 4.875f, HorizontalAlignment.LEFT);
 
 			// Intermediate stops (Przez / Via)
 			final SimplifiedRoute simplifiedRoute = MinecraftClientData.getInstance().simplifiedRouteIdMap.get(arrival.getRouteId());
@@ -317,7 +313,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 						sb.append(viaStationNames.get(j));
 					}
 					final PKPTextTextureManager.DynamicTextTexture viaStopsTex = PKPTextTextureManager.getText("via_stops", sb.toString(), PKPTextTextureManager.getRobotoRegular(), 44f, Color.WHITE);
-					renderScrollingOrStaticTexture(entity, blockPos, facing, isBackSide, viaStopsTex, textX, 5.52f, 1.05f, 18.00f, HorizontalAlignment.LEFT);
+					renderScrollingOrStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, viaStopsTex, textX, 5.52f, 1.05f, 18.00f, HorizontalAlignment.LEFT);
 				}
 			}
 
@@ -330,51 +326,48 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 					redBarSb.append(" | ").append(customMessage);
 				}
 				final PKPTextTextureManager.DynamicTextTexture delayTex = PKPTextTextureManager.getText("delay", redBarSb.toString(), PKPTextTextureManager.getRobotoItalic(), 36f, Color.WHITE);
-				renderSinglePassMarquee(entity, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.48f, 0.80f, boxWidth - 0.70f);
+				renderSinglePassMarquee(graphicsHolder, origin, blockPos, facing, isBackSide, delayTex, displayX + 0.35f, 6.48f, 0.80f, boxWidth - 0.70f);
 			}
 		}
 	}
 
-	private static void scheduleTextTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float w, float h, float u1, float v1, float u2, float v2) {
+	private static void renderTextTexture(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float w, float h, float u1, float v1, float u2, float v2) {
 		if (tex == null || w <= 0.001f || h <= 0.001f) {
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
-			graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
-			graphicsHolder.push();
-			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
-			graphicsHolder.rotateZDegrees(180);
-			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
-			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
+		graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
+		graphicsHolder.push();
+		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
+		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
+		graphicsHolder.rotateZDegrees(180);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
+		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
 
-			graphicsHolder.pop();
-		});
+		graphicsHolder.pop();
 	}
 
-	private static void scheduleCasingTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float w, float h, float u1, float v1, float u2, float v2, int light) {
+	private static void renderCasingTextureInternal(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float w, float h, float u1, float v1, float u2, float v2, int light) {
 		if (tex == null || w <= 0.001f || h <= 0.001f) {
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR_TRANSLUCENT, (graphicsHolder, offset) -> {
-			graphicsHolder.push();
-			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
-			graphicsHolder.rotateZDegrees(180);
-			graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
-			graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(tex.identifier));
+		graphicsHolder.push();
+		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
+		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
+		graphicsHolder.rotateZDegrees(180);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
+		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-			IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, light);
+		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, light);
 
-			graphicsHolder.pop();
-		});
+		graphicsHolder.pop();
 	}
 
-	private static void renderCasingTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align, int light) {
+	private static void renderCasingTexture(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align, int light) {
 		if (tex == null) {
 			return;
 		}
@@ -391,10 +384,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		}
 
-		scheduleCasingTexture(entity, blockPos, facing, tex, drawX, y, w, targetH, 0f, 0f, 1f, 1f, light);
+		renderCasingTextureInternal(graphicsHolder, origin, blockPos, facing, tex, drawX, y, w, targetH, 0f, 0f, 1f, 1f, light);
 	}
 
-	private static void renderStaticTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align) {
+	private static void renderStaticTexture(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float x, float y, float targetH, float maxW, HorizontalAlignment align) {
 		if (tex == null) {
 			return;
 		}
@@ -411,10 +404,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			}
 		}
 
-		scheduleTextTexture(entity, blockPos, facing, tex, drawX, y, w, targetH, 0f, 0f, 1f, 1f);
+		renderTextTexture(graphicsHolder, origin, blockPos, facing, tex, drawX, y, w, targetH, 0f, 0f, 1f, 1f);
 	}
 
-	private static void renderMarqueeTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW) {
+	private static void renderMarqueeTexture(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW) {
 		if (tex == null) {
 			return;
 		}
@@ -438,13 +431,13 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 				final float u1 = (clippedLeft - quadLeft) / itemW;
 				final float u2 = (clippedRight - quadLeft) / itemW;
 
-				scheduleTextTexture(entity, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
+				renderTextTexture(graphicsHolder, origin, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
 			}
 			copyStartX += cycleW;
 		}
 	}
 
-	private static void renderSinglePassMarquee(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW) {
+	private static void renderSinglePassMarquee(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW) {
 		if (tex == null) {
 			return;
 		}
@@ -466,20 +459,20 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			final float u1 = (clippedLeft - quadLeft) / itemW;
 			final float u2 = (clippedRight - quadLeft) / itemW;
 
-			scheduleTextTexture(entity, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
+			renderTextTexture(graphicsHolder, origin, blockPos, facing, tex, clippedLeft, y, clippedRight - clippedLeft, targetH, u1, 0f, u2, 1f);
 		}
 	}
 
-	private static void renderScrollingOrStaticTexture(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW, HorizontalAlignment alignIfStatic) {
+	private static void renderScrollingOrStaticTexture(GraphicsHolder graphicsHolder, BlockPos origin, BlockPos blockPos, Direction facing, boolean isBackSide, PKPTextTextureManager.DynamicTextTexture tex, float windowX, float y, float targetH, float windowW, HorizontalAlignment alignIfStatic) {
 		if (tex == null) {
 			return;
 		}
 
 		final float itemW = targetH * tex.getAspectRatio();
 		if (itemW <= windowW) {
-			renderStaticTexture(entity, blockPos, facing, isBackSide, tex, windowX, y, targetH, windowW, alignIfStatic);
+			renderStaticTexture(graphicsHolder, origin, blockPos, facing, isBackSide, tex, windowX, y, targetH, windowW, alignIfStatic);
 		} else {
-			renderMarqueeTexture(entity, blockPos, facing, isBackSide, tex, windowX, y, targetH, windowW);
+			renderMarqueeTexture(graphicsHolder, origin, blockPos, facing, isBackSide, tex, windowX, y, targetH, windowW);
 		}
 	}
 }

@@ -9,8 +9,7 @@ import org.mtr.mapping.mapper.BlockEntityRenderer;
 import org.mtr.mapping.mapper.DirectionHelper;
 import org.mtr.mapping.mapper.GraphicsHolder;
 import org.mtr.mod.block.IBlock;
-import org.mtr.mod.render.MainRenderer;
-import org.mtr.mod.render.QueuedRenderLayer;
+import org.mtr.mod.render.MoreRenderLayers;
 import pl.szablix.mtrpolishpids.block.entity.BlockEntityCitySign;
 
 public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
@@ -68,91 +67,74 @@ public class RenderCitySign extends BlockEntityRenderer<BlockEntityCitySign> {
 		final float postOffset = pl.szablix.mtrpolishpids.block.entity.CitySignGeometry.getPostOffset(maxHalfW);
 		final float postR = 0.04f; // 8 cm wide steel posts
 
+		graphicsHolder.push();
+		graphicsHolder.translate(0.5, 0, 0.5);
+		graphicsHolder.rotateYDegrees(-facing.asRotation());
+
 		// 1. Render steel posts, mounting channels, and sign backing sheet in EXTERIOR layer
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
-			gh.push();
-			gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-			gh.rotateYDegrees(-facing.asRotation());
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExterior(TEXTURE_WHITE));
 
-			// Left post (from ground y=0 to y=3.00)
-			drawBoxShaded(gh, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 3.00f, postR, light);
+		// Left post (from ground y=0 to y=3.00)
+		drawBoxShaded(graphicsHolder, -postOffset - postR, 0.0f, -postR, -postOffset + postR, 3.00f, postR, light);
 
-			// Right post (from ground y=0 to y=3.00)
-			drawBoxShaded(gh, postOffset - postR, 0.0f, -postR, postOffset + postR, 3.00f, postR, light);
+		// Right post (from ground y=0 to y=3.00)
+		drawBoxShaded(graphicsHolder, postOffset - postR, 0.0f, -postR, postOffset + postR, 3.00f, postR, light);
 
-			// Horizontal aluminum mounting channels behind front board (spanning across board width)
-			final float railLeftFront = -maxHalfW + 0.10f;
-			final float railRightFront = maxHalfW - 0.10f;
-			drawBox(gh, railLeftFront, 2.30f, 0.040f, railRightFront, 2.38f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, railLeftFront, 2.70f, 0.040f, railRightFront, 2.78f, 0.055f, COLOR_RAIL, light);
+		// Horizontal aluminum mounting channels behind front board (spanning across board width)
+		final float railLeftFront = -maxHalfW + 0.10f;
+		final float railRightFront = maxHalfW - 0.10f;
+		drawBox(graphicsHolder, railLeftFront, 2.30f, 0.040f, railRightFront, 2.38f, 0.055f, COLOR_RAIL, light);
+		drawBox(graphicsHolder, railLeftFront, 2.70f, 0.040f, railRightFront, 2.78f, 0.055f, COLOR_RAIL, light);
 
-			// Mounting clamps holding channels to posts (front)
-			drawBox(gh, -postOffset - 0.055f, 2.28f, -0.045f, -postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, -postOffset - 0.055f, 2.68f, -0.045f, -postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.055f, 2.28f, -0.045f, postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
-			drawBox(gh, postOffset - 0.055f, 2.68f, -0.045f, postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
+		// Mounting clamps holding channels to posts (front)
+		drawBox(graphicsHolder, -postOffset - 0.055f, 2.28f, -0.045f, -postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
+		drawBox(graphicsHolder, -postOffset - 0.055f, 2.68f, -0.045f, -postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
+		drawBox(graphicsHolder, postOffset - 0.055f, 2.28f, -0.045f, postOffset + 0.055f, 2.40f, 0.055f, COLOR_RAIL, light);
+		drawBox(graphicsHolder, postOffset - 0.055f, 2.68f, -0.045f, postOffset + 0.055f, 2.80f, 0.055f, COLOR_RAIL, light);
 
-			// Front sign backing sheet metal with rounded corners
-			drawRoundedSheetMetal(gh, halfWFront, BOARD_Y_BOTTOM, BOARD_Y_TOP, 0.055f, 0.070f, COLOR_SIGN_BACK, light);
+		// Front sign backing sheet metal with rounded corners
+		drawRoundedSheetMetal(graphicsHolder, halfWFront, BOARD_Y_BOTTOM, BOARD_Y_TOP, 0.055f, 0.070f, COLOR_SIGN_BACK, light);
 
-			// Optional back sign mounting structure & backing sheet
-			if (twoSided) {
-				final float railLeftBack = -maxHalfW + 0.10f;
-				final float railRightBack = maxHalfW - 0.10f;
-				drawBox(gh, railLeftBack, 2.30f, -0.055f, railRightBack, 2.38f, -0.040f, COLOR_RAIL, light);
-				drawBox(gh, railLeftBack, 2.70f, -0.055f, railRightBack, 2.78f, -0.040f, COLOR_RAIL, light);
+		// Optional back sign mounting structure & backing sheet
+		if (twoSided) {
+			final float railLeftBack = -maxHalfW + 0.10f;
+			final float railRightBack = maxHalfW - 0.10f;
+			drawBox(graphicsHolder, railLeftBack, 2.30f, -0.055f, railRightBack, 2.38f, -0.040f, COLOR_RAIL, light);
+			drawBox(graphicsHolder, railLeftBack, 2.70f, -0.055f, railRightBack, 2.78f, -0.040f, COLOR_RAIL, light);
 
-				drawBox(gh, -postOffset - 0.055f, 2.28f, -0.055f, -postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
-				drawBox(gh, -postOffset - 0.055f, 2.68f, -0.055f, -postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
-				drawBox(gh, postOffset - 0.055f, 2.28f, -0.055f, postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
-				drawBox(gh, postOffset - 0.055f, 2.68f, -0.055f, postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
+			drawBox(graphicsHolder, -postOffset - 0.055f, 2.28f, -0.055f, -postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
+			drawBox(graphicsHolder, -postOffset - 0.055f, 2.68f, -0.055f, -postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
+			drawBox(graphicsHolder, postOffset - 0.055f, 2.28f, -0.055f, postOffset + 0.055f, 2.40f, 0.045f, COLOR_RAIL, light);
+			drawBox(graphicsHolder, postOffset - 0.055f, 2.68f, -0.055f, postOffset + 0.055f, 2.80f, 0.045f, COLOR_RAIL, light);
 
-				drawRoundedSheetMetal(gh, halfWBack, BOARD_Y_BOTTOM, BOARD_Y_TOP, -0.070f, -0.055f, COLOR_SIGN_BACK, light);
-			}
-
-			gh.pop();
-		});
+			drawRoundedSheetMetal(graphicsHolder, halfWBack, BOARD_Y_BOTTOM, BOARD_Y_TOP, -0.070f, -0.055f, COLOR_SIGN_BACK, light);
+		}
 
 		// 2. Render high-resolution front face in EXTERIOR cutout layer (sharp alpha cutout, proper lighting & CCW winding)
-		MainRenderer.scheduleRender(texFront.identifier, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
-			gh.push();
-			gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-			gh.rotateYDegrees(-facing.asRotation());
-
-			// Front face with green road sign texture (facing +Z / SOUTH towards viewer)
-			gh.drawTextureInWorld(
-					halfWFront, BOARD_Y_TOP, 0.071f,
-					-halfWFront, BOARD_Y_TOP, 0.071f,
-					-halfWFront, BOARD_Y_BOTTOM, 0.071f,
-					halfWFront, BOARD_Y_BOTTOM, 0.071f,
-					1f, 1f, 0f, 0f,
-					Direction.SOUTH, 0xFFFFFFFF, light
-			);
-
-			gh.pop();
-		});
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExterior(texFront.identifier));
+		graphicsHolder.drawTextureInWorld(
+				halfWFront, BOARD_Y_TOP, 0.071f,
+				-halfWFront, BOARD_Y_TOP, 0.071f,
+				-halfWFront, BOARD_Y_BOTTOM, 0.071f,
+				halfWFront, BOARD_Y_BOTTOM, 0.071f,
+				1f, 1f, 0f, 0f,
+				Direction.SOUTH, 0xFFFFFFFF, light
+		);
 
 		// 3. Render high-resolution back face in EXTERIOR cutout layer (if two-sided)
 		if (twoSided && texBack != null) {
-			MainRenderer.scheduleRender(texBack.identifier, false, QueuedRenderLayer.EXTERIOR, (gh, offset) -> {
-				gh.push();
-				gh.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
-				gh.rotateYDegrees(-facing.asRotation());
-
-				// Back face with green road sign texture (facing -Z / NORTH towards viewer behind the sign)
-				// CCW winding facing NORTH: (-halfW, top) -> (halfW, top) -> (halfW, bottom) -> (-halfW, bottom)
-				gh.drawTextureInWorld(
-						-halfWBack, BOARD_Y_TOP, -0.071f,
-						halfWBack, BOARD_Y_TOP, -0.071f,
-						halfWBack, BOARD_Y_BOTTOM, -0.071f,
-						-halfWBack, BOARD_Y_BOTTOM, -0.071f,
-						1f, 1f, 0f, 0f,
-						Direction.NORTH, 0xFFFFFFFF, light
-				);
-
-				gh.pop();
-			});
+			graphicsHolder.createVertexConsumer(MoreRenderLayers.getExterior(texBack.identifier));
+			graphicsHolder.drawTextureInWorld(
+					-halfWBack, BOARD_Y_TOP, -0.071f,
+					halfWBack, BOARD_Y_TOP, -0.071f,
+					halfWBack, BOARD_Y_BOTTOM, -0.071f,
+					-halfWBack, BOARD_Y_BOTTOM, -0.071f,
+					1f, 1f, 0f, 0f,
+					Direction.NORTH, 0xFFFFFFFF, light
+			);
 		}
+
+		graphicsHolder.pop();
 	}
 
 	private static void drawRoundedSheetMetal(GraphicsHolder gh, float halfW, float y1, float y2, float z1, float z2, int color, int light) {
