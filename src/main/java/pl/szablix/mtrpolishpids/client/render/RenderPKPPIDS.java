@@ -43,10 +43,10 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	// Optimal 1.5 mm layer offset: perfectly flat to the eye, zero Z-fighting or clipping under glancing angles
 	private static final float LAYER_OFFSET = 0.0015f;
 
-	// Colors directly from authentic PKP PLK CSDIP specifications
 	private static final int COLOR_BADGE_BG = 0xFF000A64;   // Authentic PKP PLK display navy blue (#000a64, exact color on shaders)
 	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
 	private static final int COLOR_WHITE = 0xFFFFFFFF;      // Crisp 100% white matching dynamic text
+	private static final int COLOR_BADGE_WHITE = 0xFFB8C2CE;// Clean matte white for train badge without shader bloom overexposure
 	private static final int COLOR_CASING_TEXT = 0xFFD8E0EC;// Painted white lettering for metal casing (non-emissive)
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
 
@@ -188,7 +188,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 
 			// 2. Middle Section Left (White): Authentic white badge under departure time
 			// Non-overlapping with blue! Impossible to Z-fight or disappear under angles!
-			IDrawing.drawTexture(graphicsHolder, displayX, midY1, 0, displayX + badgeW, midY2, 0, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
+			IDrawing.drawTexture(graphicsHolder, displayX, midY1, 0, displayX + badgeW, midY2, 0, Direction.SOUTH, COLOR_BADGE_WHITE, GraphicsHolder.getDefaultLight());
 
 			// 3. Middle Section Right (Navy): Under "Przez / Via" & intermediate stops
 			IDrawing.drawTexture(graphicsHolder, displayX + badgeW, midY1, 0, displayX + boxWidth, midY2, 0, Direction.SOUTH, COLOR_BADGE_BG, GraphicsHolder.getDefaultLight());
@@ -349,7 +349,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(tex.identifier));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -357,7 +357,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, GraphicsHolder.getDefaultLight());
+		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, light);
 
 		graphicsHolder.pop();
 	}
