@@ -91,7 +91,6 @@ echo Wersja Java:
 echo.
 echo Aktywne dodatki graficzne:
 echo   [x] Sodium + Indium (FRAPI)
-echo   [x] ImmediatelyFast
 echo   [x] Iris Shaders
 echo   [x] Mod Menu
 echo   [x] Caxton + MFP Resourcepack
