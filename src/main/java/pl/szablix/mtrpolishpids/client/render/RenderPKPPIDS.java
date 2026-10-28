@@ -158,7 +158,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 
-		graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_WHITE));
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExterior(TEXTURE_WHITE));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -212,12 +212,12 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float clockCenterY = 5.0f;
 		final float clockRadius = 1.90f;
 
-		graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(clockTextureId));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		// Single draw call: Dynamic clock dial with integrated real-time hands (100% visible on shaders and vanilla)
@@ -331,7 +331,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(tex.identifier));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
