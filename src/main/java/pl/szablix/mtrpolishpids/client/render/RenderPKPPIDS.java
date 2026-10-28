@@ -46,7 +46,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private static final int COLOR_BADGE_BG = 0xFF000A64;   // Authentic PKP PLK display navy blue (#000a64, exact color on shaders)
 	private static final int COLOR_RED_LINE = 0xFFCC1010;   // Signal red without shader overexposure
 	private static final int COLOR_WHITE = 0xFFFFFFFF;      // Crisp 100% white matching dynamic text
-	private static final int COLOR_BADGE_WHITE = 0xFFDEE5EE;// Clean bright white for train badge matching departure time without shader bloom overexposure
+	private static final int COLOR_BADGE_WHITE = 0xFFC8CACD;// Balanced clean neutral white for train badge without shader glare
 	private static final int COLOR_CASING_TEXT = 0xFFD8E0EC;// Painted white lettering for metal casing (non-emissive)
 	private static final int COLOR_CLOCK_HAND = 0xFF141824;
 
