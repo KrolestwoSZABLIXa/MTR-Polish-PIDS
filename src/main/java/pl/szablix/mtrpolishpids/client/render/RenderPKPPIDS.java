@@ -131,17 +131,17 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 		final BlockPos origin = blockPos;
 
-		// 1. Clock Face & Hands on dynamic clock texture in TEXT layer (integrated texture guarantees hands are 100% visible on shaders)
+		// 1. Quads (Navy screen, white badge, red accent line) on TEXTURE_WHITE in LIGHT layer
+		renderSideQuads(entity, origin, blockPos, facing, arrivalResponseList, graphicsHolder, false);
+		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
+			renderSideQuads(entity, origin, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, true);
+		}
+
+		// 2. Clock Face & Hands on dynamic clock texture in DISPLAY layer
 		final Identifier clockTextureId = PKPTextTextureManager.getClockTexture();
 		renderSideClockFace(entity, origin, blockPos, facing, graphicsHolder, clockTextureId, false);
 		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 			renderSideClockFace(entity, origin, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, clockTextureId, true);
-		}
-
-		// 2. Quads (Navy screen, red accent line) on TEXTURE_WHITE in TEXT layer
-		renderSideQuads(entity, origin, blockPos, facing, arrivalResponseList, graphicsHolder, false);
-		if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
-			renderSideQuads(entity, origin, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, true);
 		}
 
 		// 3. Dynamic Text (Java2D HarfBuzz typography with native kerning and zero distortion)
@@ -158,7 +158,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		final float boxWidth = 23.5f;
 		final float displayX = isClockOnRight ? 2.0f : 6.50f;
 
-		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExterior(TEXTURE_WHITE));
+		graphicsHolder.createVertexConsumer(MoreRenderLayers.getLight(TEXTURE_WHITE, false));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -349,7 +349,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		graphicsHolder.createVertexConsumer(MoreRenderLayers.getExteriorTranslucent(tex.identifier));
+		graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
 		graphicsHolder.push();
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -357,7 +357,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
-		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, light);
+		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, GraphicsHolder.getDefaultLight());
 
 		graphicsHolder.pop();
 	}
