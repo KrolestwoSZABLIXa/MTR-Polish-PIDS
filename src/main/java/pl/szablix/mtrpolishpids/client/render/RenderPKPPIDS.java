@@ -131,17 +131,19 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 	private void getArrivalsAndRender(BlockEntityPKPPIDS entity, BlockPos blockPos, Direction facing, LongCollection platformIds, int light) {
 		final ObjectArrayList<ArrivalResponse> arrivalResponseList = ArrivalsCacheClient.INSTANCE.requestArrivals(platformIds);
 
-		// 1. Clock Face & Hands on dynamic clock texture in EXTERIOR layer (guarantees 100% visibility on all shaders)
+		// 1. Clock Face & Hands on dynamic clock texture in TEXT layer (integrated texture guarantees hands are 100% visible on shaders)
 		final Identifier clockTextureId = PKPTextTextureManager.getClockTexture();
-		MainRenderer.scheduleRender(clockTextureId, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(clockTextureId, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
+			graphicsHolder.createVertexConsumer(getDisplayLayer(clockTextureId));
 			renderSideClockFace(entity, blockPos, facing, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideClockFace(entity, blockPos.offset(facing), facing.getOpposite(), graphicsHolder, offset, true);
 			}
 		});
 
-		// 2. Quads (Navy screen, red accent line) on TEXTURE_WHITE in EXTERIOR layer
-		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		// 2. Quads (Navy screen, red accent line) on TEXTURE_WHITE in TEXT layer
+		MainRenderer.scheduleRender(TEXTURE_WHITE, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
+			graphicsHolder.createVertexConsumer(getDisplayLayer(TEXTURE_WHITE));
 			renderSideQuads(entity, blockPos, facing, arrivalResponseList, graphicsHolder, offset, false);
 			if (entity instanceof BlockPIDSHorizontalBase.BlockEntityHorizontalBase) {
 				renderSideQuads(entity, blockPos.offset(facing), facing.getOpposite(), arrivalResponseList, graphicsHolder, offset, true);
@@ -338,7 +340,8 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.TEXT, (graphicsHolder, offset) -> {
+			graphicsHolder.createVertexConsumer(getDisplayLayer(tex.identifier));
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
@@ -357,7 +360,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 			return;
 		}
 
-		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR, (graphicsHolder, offset) -> {
+		MainRenderer.scheduleRender(tex.identifier, false, QueuedRenderLayer.EXTERIOR_TRANSLUCENT, (graphicsHolder, offset) -> {
 			graphicsHolder.push();
 			graphicsHolder.translate(blockPos.getX() - offset.getXMapped() + 0.5, blockPos.getY() - offset.getYMapped(), blockPos.getZ() - offset.getZMapped() + 0.5);
 			graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
