@@ -36,9 +36,9 @@ if exist "%PRISM_DIR%\mods" (
         echo Kopiowanie Caxton z instancji Prism...
         copy /y "%PRISM_DIR%\mods\caxton*.jar" "run\mods\" >nul
     )
-    if not exist "run\mods\ImmediatelyFast*.jar" (
-        echo Kopiowanie ImmediatelyFast z instancji Prism...
-        copy /y "%PRISM_DIR%\mods\ImmediatelyFast*.jar" "run\mods\" >nul
+    if not exist "run\mods\indium*.jar" (
+        echo Kopiowanie Indium z instancji Prism...
+        copy /y "%PRISM_DIR%\mods\indium*.jar" "run\mods\" >nul
     )
 )
 
@@ -90,7 +90,7 @@ echo Wersja Java:
 "%JAVA_HOME%\bin\java.exe" -version
 echo.
 echo Aktywne dodatki graficzne:
-echo   [x] Sodium
+echo   [x] Sodium + Indium (FRAPI)
 echo   [x] ImmediatelyFast
 echo   [x] Iris Shaders
 echo   [x] Mod Menu
