@@ -15,6 +15,7 @@ set "PRISM_DIR=C:\Users\SZABLIX\AppData\Roaming\PrismLauncher\instances\Ciapongi
 :: Upewnij sie, ze foldery run istnieja
 if not exist "run\mods" mkdir "run\mods"
 if not exist "run\shaderpacks" mkdir "run\shaderpacks"
+if not exist "run\resourcepacks" mkdir "run\resourcepacks"
 if not exist "run\config" mkdir "run\config"
 
 :: Kopiowanie modow testowych z instancji PrismLauncher, jesli brakuje
@@ -31,6 +32,10 @@ if exist "%PRISM_DIR%\mods" (
         echo Kopiowanie Mod Menu z instancji Prism...
         copy /y "%PRISM_DIR%\mods\modmenu*.jar" "run\mods\" >nul
     )
+    if not exist "run\mods\caxton*.jar" (
+        echo Kopiowanie Caxton z instancji Prism...
+        copy /y "%PRISM_DIR%\mods\caxton*.jar" "run\mods\" >nul
+    )
 )
 
 :: Kopiowanie paczki shaderow z instancji PrismLauncher, jesli brakuje
@@ -41,7 +46,15 @@ if exist "%PRISM_DIR%\shaderpacks" (
     )
 )
 
-:: Kopiowanie konfiguracji shaderow i sodium, jesli brakuje
+:: Kopiowanie resourcepackow z instancji PrismLauncher, jesli brakuje
+if exist "%PRISM_DIR%\resourcepacks" (
+    if not exist "run\resourcepacks\MFP-Caxton*.zip" (
+        echo Kopiowanie resourcepacka MFP-Caxton z instancji Prism...
+        copy /y "%PRISM_DIR%\resourcepacks\MFP-Caxton*.zip" "run\resourcepacks\" >nul
+    )
+)
+
+:: Kopiowanie konfiguracji shaderow, sodium i caxtona, jesli brakuje
 if exist "%PRISM_DIR%\config" (
     if not exist "run\config\iris.properties" (
         copy /y "%PRISM_DIR%\config\iris.properties" "run\config\" >nul
@@ -51,6 +64,9 @@ if exist "%PRISM_DIR%\config" (
     )
     if not exist "run\config\sodium-mixins.properties" (
         copy /y "%PRISM_DIR%\config\sodium-mixins.properties" "run\config\" >nul
+    )
+    if not exist "run\config\caxton.json" (
+        copy /y "%PRISM_DIR%\config\caxton.json" "run\config\" >nul
     )
 )
 
@@ -73,6 +89,7 @@ echo Aktywne dodatki graficzne:
 echo   [x] Sodium
 echo   [x] Iris Shaders
 echo   [x] Mod Menu
+echo   [x] Caxton + MFP Resourcepack
 echo   [x] Shaders: Complementary Unbound
 echo.
 echo Kompilacja i start klienta gry Minecraft...
