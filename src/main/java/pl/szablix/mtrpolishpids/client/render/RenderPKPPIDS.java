@@ -163,7 +163,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		final ArrivalResponse arrival = arrivalResponseList.isEmpty() ? null : arrivalResponseList.get(0);
@@ -217,7 +217,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		// Single draw call: Dynamic clock dial with integrated real-time hands (100% visible on shaders and vanilla)
@@ -336,7 +336,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 3);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_WHITE, GraphicsHolder.getDefaultLight());
@@ -354,7 +354,7 @@ public class RenderPKPPIDS extends BlockEntityRenderer<BlockEntityPKPPIDS> imple
 		graphicsHolder.translate(blockPos.getX() - origin.getX() + 0.5, blockPos.getY() - origin.getY(), blockPos.getZ() - origin.getZ() + 0.5);
 		graphicsHolder.rotateYDegrees((ROTATE_90 ? 90 : 0) - facing.asRotation());
 		graphicsHolder.rotateZDegrees(180);
-		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 1);
+		graphicsHolder.translate((START_X - 8) / 16, -START_Y / 16, (START_Z - 8) / 16 - LAYER_OFFSET * 2);
 		graphicsHolder.scale(1 / SCALE, 1 / SCALE, 1);
 
 		IDrawing.drawTexture(graphicsHolder, x, y, 0f, x + w, y + h, 0f, u1, v1, u2, v2, Direction.SOUTH, COLOR_CASING_TEXT, light);
